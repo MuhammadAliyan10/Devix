@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -11,4 +7,189 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum ActivityType {
+  READING
+  VIDEO
+  ASSIGNMENT
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PREMIUM
+}
+
+model User {
+  id            String          @id @default(uuid())
+  email         String          @unique
+  name          String
+  phone         String?
+  avatar        String?
+  semester      Int?
+  degree        String?
+  major         String?
+  skills        String[]        // Array of skills (e.g., ["Python", "Java"])
+  interests     String[]        // Array of career interests (e.g., ["Software Engineer", "AI/ML Engineer"])
+  subjects      String[]        // Array of previous subjects
+  subscription  SubscriptionPlan @default(FREE)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  progress      Progress[]
+  quizAttempts  QuizAttempt[]
+  groups        GroupMember[]
+  blogs         Blog[]
+  messages      Message[]
+  settings      Settings?
+
+  Comment Comment[]
+}
+
+model Course {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  modules     Module[]
+  progress    Progress[]
+}
+
+model Module {
+  id          String    @id @default(uuid())
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  order       Int
+  content     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  activities  Activity[]
+  quizzes     Quiz[]
+}
+
+model Activity {
+  id          String      @id @default(uuid())
+  moduleId    String
+  module      Module      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  type        ActivityType
+  content     String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  progress    Progress[]
+}
+
+model Progress {
+  id          String         @id @default(uuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId    String
+  course      Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  activityId  String?
+  activity    Activity?      @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  status      ProgressStatus @default(NOT_STARTED)
+  completedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Quiz {
+  id          String        @id @default(uuid())
+  moduleId    String
+  module      Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title       String
+  questions   Json          // JSON for questions (e.g., [{ question: "", options: [], correct: "" }])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  attempts    QuizAttempt[]
+}
+
+model QuizAttempt {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId      String
+  quiz        Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  score       Int
+  answers     Json      // JSON for user answers (e.g., [{ questionId: "", answer: "" }])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Group {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  isPremium   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  members     GroupMember[]
+  messages    Message[]
+}
+
+model GroupMember {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  joinedAt  DateTime @default(now())
+}
+
+model Blog {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  content     String
+  image       String?
+  likes       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  comments    Comment[]
+}
+
+model Comment {
+  id          String   @id @default(uuid())
+  blogId      String
+  blog        Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupId     String?
+  group       Group?   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  content     String
+  fileUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Settings {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme             String   @default("light") // "light" or "dark"
+  focusMode         Boolean  @default(false)
+  notifications     Boolean  @default(true)
+  defaultResourceType String? // e.g., "video", "text"
+  twoFactorEnabled  Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
