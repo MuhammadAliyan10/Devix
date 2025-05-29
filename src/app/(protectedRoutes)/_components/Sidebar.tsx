@@ -1,4 +1,3 @@
-"use client";
 import {
   BookOpen,
   BarChart3,
@@ -60,8 +59,9 @@ const Sidebar: React.FC = () => {
       setIsMobile(mobile);
       if (mobile) {
         setIsExpanded(false);
+        setIsMobileMenuOpen(false);
       } else {
-        setIsExpanded(true); // Ensure expanded on desktop
+        setIsExpanded(true);
       }
     };
 
@@ -142,7 +142,6 @@ const Sidebar: React.FC = () => {
         { name: "Job Board", icon: Search },
       ],
     },
-
     { name: "Calendar", icon: Calendar, section: null },
     { name: "Help & Support", icon: HelpCircle, section: null },
   ];
@@ -160,7 +159,7 @@ const Sidebar: React.FC = () => {
     const isSectionExpanded = expandedSections[item.name];
 
     return (
-      <div key={item.name} className={isChild ? "ml-4" : ""}>
+      <div key={item.name} className={isChild ? "ml-0" : ""}>
         <button
           onClick={() => {
             if (hasChildren && (isExpanded || isMobile)) {
@@ -169,118 +168,79 @@ const Sidebar: React.FC = () => {
               handleItemClick(item.name, isChild);
             }
           }}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden ${
+          className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-all duration-200 group relative ${
             isActive
-              ? "bg-secondary text-primary shadow-lg"
-              : "hover:bg-secondary text-foreground hover:text-foreground"
-          } ${!isExpanded && !isMobile && "justify-center"} ${
-            isChild ? "text-sm py-2" : ""
+              ? "text-indigo-600 bg-indigo-50 border-r-2 border-indigo-600"
+              : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+          } ${!isExpanded && !isMobile && "justify-center px-2"} ${
+            isChild ? "text-sm py-1.5 pl-9" : "text-sm"
           }`}
           aria-label={item.name}
         >
-          {/* Active indicator */}
-          <div
-            className={`absolute left-0 top-0 h-full w-1 bg-secondary transition-transform duration-300 ${
-              isActive ? "transform scale-y-100" : "transform scale-y-0"
+          <item.icon
+            size={isChild ? 16 : 18}
+            className={`flex-shrink-0 ${
+              isActive ? "text-indigo-600" : "text-gray-500"
             }`}
           />
-
-          <item.icon size={isChild ? 16 : 20} className="flex-shrink-0" />
-
           {(isExpanded || isMobile) && (
             <>
-              <span
-                className={`font-medium leading-normal flex-grow text-left ${
-                  isChild ? "text-sm" : "text-base"
-                }`}
-              >
-                {item.name}
-              </span>
+              <span className="flex-grow font-medium">{item.name}</span>
               {hasChildren && (
                 <div className="flex-shrink-0">
                   {isSectionExpanded ? (
-                    <ChevronUp size={16} />
+                    <ChevronUp size={16} className="text-gray-400" />
                   ) : (
-                    <ChevronDown size={16} />
+                    <ChevronDown size={16} className="text-gray-400" />
                   )}
                 </div>
               )}
             </>
           )}
-
-          {/* Tooltip for collapsed state */}
-          {!isExpanded && !isMobile && (
-            <div className="absolute left-full ml-2 px-3 py-2 bg-popover text-popover-foreground text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 border">
-              {item.name}
-              <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 bg-popover rotate-45 border-l border-b" />
-            </div>
-          )}
         </button>
-
-        {/* Dropdown children */}
-        {hasChildren &&
-          (isExpanded || isMobile) &&
-          expandedSections[item.name] && (
-            <div className="mt-2 space-y-1 pl-4 border-l-2 border-border ml-4">
-              {item.children.map((child) => renderNavItem(child, true))}
-            </div>
-          )}
+        {hasChildren && (isExpanded || isMobile) && isSectionExpanded && (
+          <div className="py-1">
+            {item.children.map((child) => renderNavItem(child, true))}
+          </div>
+        )}
       </div>
     );
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white">
       {/* Header */}
       <div
-        className={`flex gap-4 items-center p-6 border-b border-border ${
-          !isExpanded && !isMobile && "justify-center px-4"
+        className={`flex items-center px-4 py-4 border-b border-gray-200 ${
+          !isExpanded && !isMobile && "justify-center px-2"
         }`}
       >
-        <div className="relative">
-          <div className="bg-secondary rounded-full size-12 flex items-center justify-center text-primary font-bold text-lg shadow-lg">
-            S
-          </div>
-          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background" />
-        </div>
         {(isExpanded || isMobile) && (
-          <div className="flex flex-col">
-            <h1 className="text-foreground text-lg font-bold leading-normal">
-              Sophia Chen
-            </h1>
-            <p className="text-muted-foreground text-sm font-medium leading-normal">
-              Full Stack Developer
-            </p>
-          </div>
+          <span className="text-gray-900 font-semibold text-base">Tech</span>
         )}
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto py-6 px-4">
-        <div className="space-y-2">
+      <div className="flex-1 overflow-y-auto py-2">
+        <nav className="space-y-1">
           {navItems.map((item) => renderNavItem(item))}
-        </div>
+        </nav>
       </div>
 
       {/* Footer */}
-      <div className="border-t border-border p-4">
+      <div className="border-t border-gray-200 p-3">
         <button
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-destructive/10 text-destructive transition-all duration-300 group ${
-            !isExpanded && !isMobile && "justify-center"
+          className={`w-full flex items-center gap-3 px-3 py-2 text-left text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 group ${
+            !isExpanded && !isMobile && "justify-center px-2"
           }`}
           aria-label="Logout"
         >
-          <LogOut size={20} className="flex-shrink-0" />
+          <LogOut
+            size={18}
+            className="flex-shrink-0 text-gray-500 group-hover:text-red-600"
+          />
           {(isExpanded || isMobile) && (
-            <span className="font-medium leading-normal">Logout</span>
-          )}
-
-          {/* Tooltip for collapsed state */}
-          {!isExpanded && !isMobile && (
-            <div className="absolute left-full ml-2 px-3 py-2 bg-popover text-popover-foreground text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 border">
-              Logout
-              <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 bg-popover rotate-45 border-l border-b" />
-            </div>
+            <span className="group-hover:text-red-600">Logout</span>
           )}
         </button>
       </div>
@@ -289,21 +249,21 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      {/* Mobile Toggle Button */}
+      {/* Mobile menu button */}
       {isMobile && (
         <button
           onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-50 md:hidden flex items-center justify-center w-12 h-12 rounded-xl bg-background shadow-lg border border-border hover:shadow-xl transition-all duration-300"
+          className="fixed top-4 left-4 z-50 md:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-white shadow-sm border border-gray-200 hover:bg-gray-50 transition-all duration-200"
           aria-label="Toggle Menu"
         >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       )}
 
-      {/* Mobile Overlay */}
+      {/* Mobile overlay */}
       {isMobile && isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-black/30 z-40 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -315,29 +275,28 @@ const Sidebar: React.FC = () => {
             isMobile
               ? `fixed top-0 left-0 z-50 transform transition-transform duration-300 ease-in-out ${
                   isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-                } w-80 h-full`
-              : `relative transition-all duration-300 ease-in-out ${
-                  isExpanded ? "w-80" : "w-20"
-                } h-screen flex-shrink-0`
+                } w-72 h-full`
+              : `fixed top-0 left-0 h-screen z-30 transition-all duration-300 ease-in-out ${
+                  isExpanded ? "w-64" : "w-16"
+                }`
           }
-          bg-background border-r border-border shadow-xl
+          bg-white border-r border-gray-200 shadow-sm
         `}
       >
-        {/* Desktop Toggle Button */}
+        {/* Desktop toggle button */}
         {!isMobile && (
           <button
             onClick={toggleSidebar}
-            className="absolute top-2 -right-4 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-primary hover:bg-secondary/50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-110"
+            className="absolute top-6 -right-3 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all duration-200 shadow-sm"
             aria-label={isExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
           >
             {isExpanded ? (
-              <ChevronLeft size={18} />
+              <ChevronLeft size={14} />
             ) : (
-              <ChevronRight size={18} />
+              <ChevronRight size={14} />
             )}
           </button>
         )}
-
         {sidebarContent}
       </div>
     </>

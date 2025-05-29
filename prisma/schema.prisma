@@ -15,6 +15,18 @@ enum ActivityType {
   ASSIGNMENT
 }
 
+enum UserStatus {
+  STUDENT
+  GRADUATE
+  WORKER
+}
+
+enum UserExperience {
+  FRESHER
+  EXPERIENCED
+  INTERN
+}
+
 enum ProgressStatus {
   NOT_STARTED
   IN_PROGRESS
@@ -27,29 +39,44 @@ enum SubscriptionPlan {
   PREMIUM
 }
 
-model User {
-  id            String          @id @default(uuid())
-  email         String          @unique
-  name          String
-  phone         String?
-  avatar        String?
-  semester      Int?
-  degree        String?
-  major         String?
-  skills        String[]        // Array of skills (e.g., ["Python", "Java"])
-  interests     String[]        // Array of career interests (e.g., ["Software Engineer", "AI/ML Engineer"])
-  subjects      String[]        // Array of previous subjects
-  subscription  SubscriptionPlan @default(FREE)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  progress      Progress[]
-  quizAttempts  QuizAttempt[]
-  groups        GroupMember[]
-  blogs         Blog[]
-  messages      Message[]
-  settings      Settings?
+enum LearningStyle {
+  VIDEO
+  TEXT
+  INTERACTIVE
+}
 
-  Comment Comment[]
+model User {
+  id              String          @id @default(uuid())
+  email           String          @unique
+  name            String
+  phone           String?
+  dateOfBirth     DateTime?
+  avatar          String?
+  currentSemester Int?            // Current semester (e.g., 4)
+  degree          String?         // e.g., "Bachelor of Science"
+  major           String?         // e.g., "Computer Science"
+  institution     String?         // Name of university/college
+  about           String?
+  skills          String[]        // e.g., ["Python", "JavaScript"]
+  interests       String[]        // e.g., ["Web Development", "AI"]
+  subscription    SubscriptionPlan @default(FREE)
+  userStatus      UserStatus      @default(STUDENT)
+  userExperience  UserExperience  @default(FRESHER)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  progress        Progress[]
+  quizAttempts    QuizAttempt[]
+  groups          GroupMember[]
+  blogs           Blog[]
+  messages        Message[]
+  settings        Settings?
+  comments        Comment[]
+  previousSemesters PreviousSemester[]
+  priorEducations PriorEducation[]
+  certifications  Certification[]
+  extracurriculars Extracurricular[]
+  internships     Internship[]
+  futurePlans     FuturePlan?
 }
 
 model Course {
@@ -76,15 +103,15 @@ model Module {
 }
 
 model Activity {
-  id          String      @id @default(uuid())
+  id          String       @id @default(uuid())
   moduleId    String
-  module      Module      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  module      Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   title       String
   description String?
   type        ActivityType
   content     String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   progress    Progress[]
 }
 
@@ -97,6 +124,7 @@ model Progress {
   activityId  String?
   activity    Activity?      @relation(fields: [activityId], references: [id], onDelete: SetNull)
   status      ProgressStatus @default(NOT_STARTED)
+  progress    Int?           // Percentage completed (0-100)
   completedAt DateTime?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
@@ -182,14 +210,100 @@ model Message {
 }
 
 model Settings {
-  id                String   @id @default(uuid())
-  userId            String   @unique
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  theme             String   @default("light") // "light" or "dark"
-  focusMode         Boolean  @default(false)
-  notifications     Boolean  @default(true)
-  defaultResourceType String? // e.g., "video", "text"
-  twoFactorEnabled  Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                String       @id @default(uuid())
+  userId            String       @unique
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme             String       @default("light") // "light" or "dark"
+  focusMode         Boolean      @default(false)
+  notifications     Boolean      @default(true)
+  defaultResourceType LearningStyle? // e.g., "VIDEO", "TEXT", "INTERACTIVE"
+  twoFactorEnabled  Boolean      @default(false)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+}
+
+model PreviousSemester {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  semester    Int
+  year        Int
+  gpa         Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  subjects    SemesterSubject[]
+}
+
+model SemesterSubject {
+  id          String   @id @default(uuid())
+  semesterId  String
+  semester    PreviousSemester @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  name        String
+  grade       String?
+  status      String   // e.g., "completed", "incomplete", "missed"
+  resourceIds String[] // IDs of resources completed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PriorEducation {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level       String   // e.g., "High School", "Associate Degree"
+  institution String
+  yearCompleted Int
+  grades      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Certification {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String   // e.g., "AWS Certified Developer"
+  issuer        String   // e.g., "Amazon"
+  year          Int
+  certificateId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Extracurricular {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String   // e.g., "Coding Club"
+  role        String   // e.g., "Member", "President"
+  duration    String   // e.g., "2024-Present"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Internship {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     String
+  role        String   // e.g., "Software Intern"
+  startDate   DateTime
+  endDate     DateTime?
+  skillsGained String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FuturePlan {
+  id                String       @id @default(uuid())
+  userId            String       @unique
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  careerGoals       String[]     // e.g., ["Become a Software Engineer"]
+  careerInterests   String[]     // e.g., ["Web Development", "AI"]
+  preferredLearningStyle LearningStyle
+  hoursPerWeek      Int
+  preferredDays     String[]     // e.g., ["Monday", "Wednesday"]
+  targetCompletionDate DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 }

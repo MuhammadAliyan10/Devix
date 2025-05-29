@@ -1,6 +1,3 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Bell,
   Search,
@@ -40,33 +37,8 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  // Initialize theme from localStorage or system preference
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const systemPrefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-
-    if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    } else {
-      setIsDarkMode(false);
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
-
   const toggleTheme = () => {
-    const newTheme = !isDarkMode;
-    setIsDarkMode(newTheme);
-
-    if (newTheme) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    setIsDarkMode(!isDarkMode);
   };
 
   const toggleSearch = () => {
@@ -128,184 +100,169 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
-    <div className="layout-container flex h-full grow flex-col">
-      <header className="flex items-center justify-between border-b border-border px-4 md:px-10 py-3 relative">
-        <div className="flex items-center gap-4 text-primary">
+    <header className="bg-background border-b border-border z-20">
+      <div className="flex items-center justify-between h-16 px-4 md:px-6">
+        {/* Left Section */}
+        <div className="flex items-center gap-4">
           {isMobile && (
-            <Button
+            <button
               onClick={onMenuToggle}
-              className="flex md:hidden items-center rounded-xl h-10 bg-secondary text-primary text-sm font-bold px-2.5"
+              className="flex items-center justify-center w-8 h-8 text-gray-600 hover:text-primary hover:bg-background rounded-md transition-colors"
             >
               <Menu size={20} />
-            </Button>
+            </button>
           )}
 
-          {/* Logo */}
-          <div className="flex items-center gap-2 md:gap-4">
-            <div className="size-4">
-              <svg
-                viewBox="0 0 48 48"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </div>
-            <h2 className="text-primary text-lg font-bold">Devix</h2>
-          </div>
-        </div>
-
-        {/* Right Section */}
-        <div className="flex flex-1 justify-end items-center gap-2 md:gap-8">
-          {/* Desktop Search */}
+          {/* Search Bar - Stripe style */}
           {!isMobile && (
-            <div className="flex min-w-40 h-10 max-w-64">
-              <div className="text-primary flex items-center justify-center px-2 rounded-l-xl bg-secondary">
-                <Search size={18} />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search size={16} className="text-gray-400" />
               </div>
-              <Input
-                placeholder="Search"
-                className="flex w-full rounded-xl text-primary bg-secondary h-full placeholder:text-primary px-4 rounded-l-none pl-2 text-base font-normal"
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-64 pl-10 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-500"
               />
             </div>
           )}
+        </div>
 
-          <div className="flex gap-2">
-            {isMobile && (
-              <Button
-                onClick={toggleSearch}
-                className="flex items-center rounded-xl h-10 bg-secondary text-primary text-sm font-bold px-2.5"
-              >
-                <Search size={20} />
-              </Button>
-            )}
-
-            {/* Theme Toggle */}
-            <Button
-              onClick={toggleTheme}
-              className="flex items-center rounded-xl h-10 bg-secondary text-primary text-sm font-bold px-2.5 hover:bg-secondary"
-              aria-label="Toggle theme"
+        {/* Right Section */}
+        <div className="flex items-center gap-3">
+          {/* Mobile Search */}
+          {isMobile && (
+            <button
+              onClick={toggleSearch}
+              className="flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
             >
-              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </Button>
+              <Search size={18} />
+            </button>
+          )}
 
-            {/* Notifications */}
-            <div className="relative notification-menu">
-              <Button
-                onClick={toggleNotificationMenu}
-                className="flex items-center rounded-xl h-10 bg-secondary  hover:bg-secondary text-primary text-sm font-bold px-2.5 relative"
-              >
-                <Bell size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {unreadCount}
-                  </span>
-                )}
-              </Button>
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+            aria-label="Toggle theme"
+          >
+            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
 
-              {/* Notifications Dropdown */}
-              {isNotificationMenuOpen && (
-                <div className="absolute right-0 top-12 w-80 bg-background border border-border rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto">
-                  <div className="p-4 border-b border-border">
-                    <h3 className="font-semibold text-foreground">
+          {/* Notifications */}
+          <div className="relative notification-menu">
+            <button
+              onClick={toggleNotificationMenu}
+              className="relative flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+            >
+              <Bell size={18} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-medium">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notifications Dropdown */}
+            {isNotificationMenuOpen && (
+              <div className="absolute right-0 top-10 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                <div className="p-4 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-gray-900">
                       Notifications
                     </h3>
                     {unreadCount > 0 && (
-                      <p className="text-sm text-muted-foreground">
+                      <span className="text-xs text-gray-500">
                         {unreadCount} unread
-                      </p>
+                      </span>
                     )}
                   </div>
-                  <div className="max-h-64 overflow-y-auto">
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-4 border-b border-border hover:bg-secondary cursor-pointer ${
-                          notification.unread ? "bg-secondary/50" : ""
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-medium text-sm text-foreground">
-                              {notification.title}
-                            </h4>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-2">
-                              {notification.time}
-                            </p>
-                          </div>
-                          {notification.unread && (
-                            <div className="w-2 h-2 bg-primary rounded-full mt-1"></div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="p-4 border-t border-border">
-                    <Button variant="ghost" className="w-full text-sm">
-                      View all notifications
-                    </Button>
-                  </div>
                 </div>
-              )}
-            </div>
-
-            {/* Settings */}
-            <Button className="flex items-center rounded-xl h-10 bg-secondary  hover:bg-secondary text-primary text-sm font-bold px-2.5">
-              <Settings size={20} />
-            </Button>
+                <div className="max-h-64 overflow-y-auto">
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
+                        notification.unread ? "bg-blue-50" : ""
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm text-gray-900">
+                            {notification.title}
+                          </h4>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {notification.message}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-2">
+                            {notification.time}
+                          </p>
+                        </div>
+                        {notification.unread && (
+                          <div className="w-2 h-2 bg-indigo-600 rounded-full mt-1"></div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="p-3 border-t border-gray-200">
+                  <button className="w-full text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                    View all notifications
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Settings */}
+          <button className="flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors">
+            <Settings size={18} />
+          </button>
 
           {/* Profile Menu */}
           <div className="relative profile-menu">
             <button
               onClick={toggleProfileMenu}
-              className="flex items-center gap-2 rounded-full size-10 bg-secondary hover:bg-secondary/80 transition-colors duration-200"
+              className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-md transition-colors"
               aria-label="Profile menu"
             >
-              <div className="rounded-full size-10 bg-primary/10 flex items-center justify-center">
-                <User size={20} className="text-primary" />
+              <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-medium">SC</span>
               </div>
+              <ChevronDown size={14} className="text-gray-500" />
             </button>
 
             {/* Profile Dropdown */}
             {isProfileMenuOpen && (
-              <div className="absolute right-0 top-12 w-64 bg-background border border-border rounded-xl shadow-lg z-50">
-                <div className="p-4 border-b border-border">
+              <div className="absolute right-0 top-10 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                <div className="p-4 border-b border-gray-200">
                   <div className="flex items-center gap-3">
-                    <div className="rounded-full size-12 bg-primary/10 flex items-center justify-center">
-                      <User size={24} className="text-primary" />
+                    <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-medium">SC</span>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">
+                      <h3 className="font-semibold text-gray-900">
                         Sophia Chen
                       </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Full Stack Developer
-                      </p>
+                      <p className="text-sm text-gray-600">sophia@devix.com</p>
                     </div>
                   </div>
                 </div>
                 <div className="py-2">
-                  <button className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary w-full text-left">
+                  <button className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left">
                     <UserCircle size={16} />
                     My Profile
                   </button>
-                  <button className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary w-full text-left">
+                  <button className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left">
                     <Settings size={16} />
                     Account Settings
                   </button>
-                  <button className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary w-full text-left">
+                  <button className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left">
                     <HelpCircle size={16} />
                     Help & Support
                   </button>
-                  <hr className="my-2 border-border" />
-                  <button className="flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 w-full text-left">
+                  <hr className="my-2 border-gray-200" />
+                  <button className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left">
                     <LogOut size={16} />
                     Sign Out
                   </button>
@@ -314,32 +271,33 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
             )}
           </div>
         </div>
+      </div>
 
-        {/* Mobile Search Bar */}
-        {isMobile && isSearchOpen && (
-          <div className="absolute top-full left-0 right-0 p-4 bg-background border-b border-border z-40">
-            <div className="flex gap-2">
-              <div className="flex flex-1 h-10">
-                <div className="text-primary flex items-center justify-center px-2 rounded-l-xl bg-secondary">
-                  <Search size={18} />
-                </div>
-                <Input
-                  placeholder="Search"
-                  className="flex w-full rounded-xl text-primary bg-secondary h-full placeholder:text-primary px-4 rounded-l-none pl-2 text-base font-normal"
-                  autoFocus
-                />
+      {/* Mobile Search Bar */}
+      {isMobile && isSearchOpen && (
+        <div className="border-t border-gray-200 p-4 bg-white">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search size={16} className="text-gray-400" />
               </div>
-              <Button
-                onClick={toggleSearch}
-                className="flex items-center rounded-xl h-10 bg-secondary text-primary text-sm font-bold px-2.5"
-              >
-                <X size={20} />
-              </Button>
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-500"
+                autoFocus
+              />
             </div>
+            <button
+              onClick={toggleSearch}
+              className="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+            >
+              <X size={18} />
+            </button>
           </div>
-        )}
-      </header>
-    </div>
+        </div>
+      )}
+    </header>
   );
 };
 
