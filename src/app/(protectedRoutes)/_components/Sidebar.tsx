@@ -14,7 +14,6 @@ import {
   Trophy,
   FileText,
   Users,
-  Bell,
   HelpCircle,
   Menu,
   X,
@@ -43,8 +42,12 @@ interface NavItem {
   }[];
 }
 
-const Sidebar: React.FC = () => {
-  const [isExpanded, setIsExpanded] = useState(true);
+interface SidebarProps {
+  isExpanded: boolean;
+  toggleSidebar: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
   const [activePage, setActivePage] = useState<string>("Home");
   const [expandedSections, setExpandedSections] = useState<{
     [key: string]: boolean;
@@ -58,10 +61,7 @@ const Sidebar: React.FC = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
       if (mobile) {
-        setIsExpanded(false);
         setIsMobileMenuOpen(false);
-      } else {
-        setIsExpanded(true);
       }
     };
 
@@ -70,11 +70,11 @@ const Sidebar: React.FC = () => {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  const toggleSidebar = () => {
+  const handleToggleSidebar = () => {
     if (isMobile) {
       setIsMobileMenuOpen(!isMobileMenuOpen);
     } else {
-      setIsExpanded(!isExpanded);
+      toggleSidebar();
     }
   };
 
@@ -170,8 +170,8 @@ const Sidebar: React.FC = () => {
           }}
           className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-all duration-200 group relative ${
             isActive
-              ? "text-indigo-600 bg-indigo-50 border-r-2 border-indigo-600"
-              : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              ? "text-indigo-600 light:bg-indigo-50 border-r-2 border-indigo-600"
+              : "light:text-gray-700 text-primary light:hover:text-gray-900 dark:hover:bg-secondary light:hover:bg-gray-50"
           } ${!isExpanded && !isMobile && "justify-center px-2"} ${
             isChild ? "text-sm py-1.5 pl-9" : "text-sm"
           }`}
@@ -208,15 +208,17 @@ const Sidebar: React.FC = () => {
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-background">
       {/* Header */}
       <div
-        className={`flex items-center px-4 py-4 border-b border-gray-200 ${
+        className={`flex items-center px-4 py-4 border-b border-border ${
           !isExpanded && !isMobile && "justify-center px-2"
         }`}
       >
         {(isExpanded || isMobile) && (
-          <span className="text-gray-900 font-semibold text-base">Tech</span>
+          <span className="light:text-gray-900 text-primary font-semibold text-base">
+            Devix
+          </span>
         )}
       </div>
 
@@ -228,16 +230,16 @@ const Sidebar: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-gray-200 p-3">
+      <div className="border-t border-border p-3">
         <button
-          className={`w-full flex items-center gap-3 px-3 py-2 text-left text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 group ${
+          className={`w-full flex items-center gap-3 px-3 py-2 text-left text-sm font-medium light:text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 group ${
             !isExpanded && !isMobile && "justify-center px-2"
           }`}
           aria-label="Logout"
         >
           <LogOut
             size={18}
-            className="flex-shrink-0 text-gray-500 group-hover:text-red-600"
+            className="flex-shrink-0 light:text-gray-500 light:group-hover:text-red-600"
           />
           {(isExpanded || isMobile) && (
             <span className="group-hover:text-red-600">Logout</span>
@@ -252,8 +254,8 @@ const Sidebar: React.FC = () => {
       {/* Mobile menu button */}
       {isMobile && (
         <button
-          onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-50 md:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-white shadow-sm border border-gray-200 hover:bg-gray-50 transition-all duration-200"
+          onClick={handleToggleSidebar}
+          className="fixed top-4 left-4 z-50 md:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-background shadow-sm border border-border hover:bg-background/10 transition-all duration-200"
           aria-label="Toggle Menu"
         >
           {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -280,14 +282,14 @@ const Sidebar: React.FC = () => {
                   isExpanded ? "w-64" : "w-16"
                 }`
           }
-          bg-white border-r border-gray-200 shadow-sm
+          bg-background border-r border-border shadow-sm
         `}
       >
         {/* Desktop toggle button */}
         {!isMobile && (
           <button
             onClick={toggleSidebar}
-            className="absolute top-6 -right-3 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all duration-200 shadow-sm"
+            className="absolute top-90 -right-3 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-background border border-border text-primary light:hover:text-gray-600 hover:bg-secondary light:hover:bg-gray-50 transition-all duration-200 shadow-sm"
             aria-label={isExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
           >
             {isExpanded ? (

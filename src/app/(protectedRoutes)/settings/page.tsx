@@ -1,6 +1,6 @@
 import React from "react";
 import { House, Settings, User, CreditCard, Monitor, Lock } from "lucide-react";
-import PageHeader from "../_components/PageHeader";
+import PageHeader from "../../../components/ReuseableComponents/Main/PageHeader";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Card,
