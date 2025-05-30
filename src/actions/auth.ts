@@ -75,7 +75,7 @@ export const validateRequest = cache(async () => {
       session,
     };
   } catch (error) {
-    console.error("Session validation error:");
+    console.error("Session validation error:", error);
     return {
       user: null,
       session: null,

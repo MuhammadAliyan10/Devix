@@ -14,9 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type Props = {};
-
-export default function BasicInfoStep(props: Props) {
+export default function BasicInfoStep() {
   const { formData, getStepValidationErrors, updateBasicInfoField } =
     useDevixStore();
   const errors = getStepValidationErrors("basicInfo");

@@ -9,8 +9,6 @@ import CurrentStatusStep from "./CurrentStatusStep";
 import FuturePlansStep from "./FuturePlansStep";
 import { useDevixStore } from "@/store/useDevixStore";
 
-type Props = {};
-
 const steps = [
   {
     id: "basicInfo",
@@ -38,11 +36,11 @@ const steps = [
   },
 ];
 
-export default function UserOnboardingDialog(props: Props) {
+export default function UserOnboardingDialog() {
   const { isModalOpen, setModalOpen, isCompleted, setCompleted } =
     useDevixStore();
 
-  const handleCompletion = (id: string) => {
+  const handleCompletion = () => {
     setCompleted(true);
   };
 

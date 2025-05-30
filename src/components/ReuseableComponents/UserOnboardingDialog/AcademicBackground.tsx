@@ -14,8 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { ProgressStatus } from "@/lib/types";
 
-type Props = {};
-
 type SemesterSubject = {
   name: string;
   grade?: string;
@@ -29,7 +27,7 @@ type PreviousSemester = {
   gpa?: number;
 };
 
-export default function AcademicBackground(props: Props) {
+export default function AcademicBackground() {
   const { formData, getStepValidationErrors, updateAcademicHistoryField } =
     useDevixStore();
   const errors = getStepValidationErrors("academicHistory");
@@ -164,7 +162,7 @@ export default function AcademicBackground(props: Props) {
               No Academic Background Required
             </h3>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              Since you're in your first semester, you don't need to provide
+              Since you are in your first semester, you do not need to provide
               previous academic background. You can skip this step and continue
               with the next section.
             </p>

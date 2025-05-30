@@ -14,9 +14,7 @@ import {
 } from "@/components/ui/select";
 import { LearningStyle } from "@/lib/types";
 
-type Props = {};
-
-const FuturePlansStep = (props: Props) => {
+const FuturePlansStep = () => {
   const {
     formData,
     updateFuturePlansField,
@@ -25,7 +23,6 @@ const FuturePlansStep = (props: Props) => {
     removeCareerGoal,
     addCareerInterest,
     removeCareerInterest,
-    setCompleted,
   } = useDevixStore();
   const { futurePlans } = formData;
   const errors = getStepValidationErrors("futurePlans");

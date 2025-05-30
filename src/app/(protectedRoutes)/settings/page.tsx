@@ -14,9 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
-type Props = {};
-
-const page = (props: Props) => {
+const page = () => {
   return (
     <div className="min-h-screen">
       <PageHeader

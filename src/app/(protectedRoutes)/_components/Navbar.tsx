@@ -5,7 +5,6 @@ import {
   Bell,
   Search,
   Settings,
-  User,
   Sun,
   Moon,
   Menu,
@@ -13,7 +12,6 @@ import {
   ChevronDown,
   LogOut,
   UserCircle,
-  HelpCircle,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -25,7 +23,7 @@ interface NavbarProps {
   isSidebarExpanded: boolean;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onMenuToggle, isSidebarExpanded }) => {
+const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const { user } = useSession();
 

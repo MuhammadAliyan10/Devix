@@ -1,25 +1,14 @@
 import React from "react";
 import PurpleIcon from "../PurpleIcon";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
 
 type Props = {
   leftIcon?: React.ReactNode;
   mainIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   heading?: string;
-  placeHolder?: string;
-  children?: React.ReactNode;
 };
 
-const PageHeader = ({
-  leftIcon,
-  rightIcon,
-  mainIcon,
-  heading,
-  placeHolder,
-  children,
-}: Props) => {
+const PageHeader = ({ leftIcon, rightIcon, mainIcon, heading }: Props) => {
   return (
     <div className="w-full flex flex-col gap-8">
       <div className="w-full flex justify-center sm:justify-between items-center gap-8 flex-wrap">

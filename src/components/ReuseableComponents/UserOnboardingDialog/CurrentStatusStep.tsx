@@ -3,18 +3,9 @@ import { cn } from "@/lib/utils";
 import { useDevixStore } from "@/store/useDevixStore";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-type Props = {};
 
 type CurrentSubject = {
   name: string;
@@ -36,7 +27,7 @@ type Internship = {
   skillsGained: string[];
 };
 
-export default function CurrentStatusStep(props: Props) {
+export default function CurrentStatusStep() {
   const { formData, getStepValidationErrors, updateCurrentStatusField } =
     useDevixStore();
   const errors = getStepValidationErrors("currentStatus");

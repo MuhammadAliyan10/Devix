@@ -5,19 +5,16 @@ import { useSession } from "@/provider/SessionProvider";
 import { useDevixStore } from "@/store/useDevixStore";
 import React, { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
 
-type Props = {};
-
-const HomeComponent = (props: Props) => {
+const HomeComponent = () => {
   const { user } = useSession();
 
   const { isCompleted, initializeStore, isSubmitting } = useDevixStore();
   const [showBadge, setShowBadge] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
+    // setIsLoading(true);
     try {
       if (user?.id) {
         initializeStore(user.id);
@@ -25,7 +22,7 @@ const HomeComponent = (props: Props) => {
     } catch (error) {
       console.log(error);
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   }, [user?.id, initializeStore]);
 

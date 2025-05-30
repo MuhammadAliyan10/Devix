@@ -1,4 +1,5 @@
 import { logout } from "@/app/(auth)/actions";
+import { motion } from "framer-motion";
 import {
   BookOpen,
   BarChart3,
@@ -6,7 +7,6 @@ import {
   NotepadText,
   Rss,
   User,
-  Settings,
   ChevronRight,
   ChevronLeft,
   ChevronDown,
@@ -30,6 +30,7 @@ import {
   Globe,
   Heart,
   Star,
+  GraduationCap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
@@ -230,9 +231,42 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
         }`}
       >
         {(isExpanded || isMobile) && (
-          <span className="light:text-gray-900 text-primary font-semibold text-base">
-            Devix
-          </span>
+          <motion.div
+            className="flex items-center gap-3"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <div className="relative">
+              <motion.div
+                className="w-11 h-11 rounded-2xl flex items-center justify-center relative overflow-hidden"
+                animate={{
+                  background: [
+                    "linear-gradient(45deg, #8b5cf6, #3b82f6)",
+                    "linear-gradient(45deg, #3b82f6, #8b5cf6)",
+                    "linear-gradient(45deg, #8b5cf6, #3b82f6)",
+                  ],
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >
+                <GraduationCap className="w-6 h-6 text-white relative z-10" />
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30"
+                  animate={{ x: [-100, 100] }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                />
+              </motion.div>
+              <div className="absolute -inset-2 bg-gradient-to-r from-violet-500 to-blue-500 rounded-2xl opacity-30 blur-lg" />
+            </div>
+            <div>
+              <h1 className="text-xl dark:font-black bg-gradient-to-r from-white via-violet-200 to-blue-200 bg-clip-text text-transparent">
+                Devix
+              </h1>
+            </div>
+          </motion.div>
         )}
       </div>
 
@@ -246,7 +280,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
       {/* Footer */}
       <div className="border-t border-border p-3">
         <button
-          className={`w-full flex items-center gap-3 px-3 py-2 text-left text-sm font-medium light:text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 group ${
+          className={`w-full flex items-center gap-3 px-3 py-2 text-left text-sm font-medium  light:text-gray-700 hover:text-red-600 transition-all duration-200 group ${
             !isExpanded && !isMobile && "justify-center px-2"
           }`}
           aria-label="Logout"
