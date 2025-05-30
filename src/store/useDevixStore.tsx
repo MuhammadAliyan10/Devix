@@ -1,3 +1,4 @@
+// store/useDevixStore.ts
 import { create } from "zustand";
 import {
   validateBasicInfo,
@@ -13,6 +14,7 @@ import {
   SubscriptionPlan,
   LearningStyle,
 } from "@/lib/types";
+import { fetchUserData } from "@/actions/data";
 
 const initialState: DevixFormState = {
   basicInfo: {
@@ -75,6 +77,7 @@ type DevixStore = {
   isSubmitting: boolean;
   formData: DevixFormState;
   validation: ValidationState;
+  initializeStore: (userId: string) => Promise<void>;
   updateBasicInfoField: <K extends keyof DevixFormState["basicInfo"]>(
     field: K,
     value: DevixFormState["basicInfo"][K]
@@ -117,6 +120,52 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
   isSubmitting: false,
   formData: initialState,
   validation: initialValidationData,
+
+  initializeStore: async (userId: string) => {
+    const initialData = await fetchUserData(userId);
+
+    if ("status" in initialData && !initialData.success) {
+      console.error(initialData.message);
+      set({
+        formData: initialState,
+        validation: initialValidationData,
+        isCompleted: false,
+      });
+      return;
+    }
+    set({
+      formData: "basicInfo" in initialData ? initialData : initialState,
+      validation: {
+        basicInfo:
+          "basicInfo" in initialData
+            ? validateBasicInfo(initialData.basicInfo)
+            : initialValidationData.basicInfo,
+        academicHistory: validateAcademicHistory(
+          "academicHistory" in initialData
+            ? initialData.academicHistory
+            : initialState.academicHistory,
+          "basicInfo" in initialData
+            ? initialData.basicInfo.currentSemester
+            : initialState.basicInfo.currentSemester
+        ),
+        currentStatus:
+          "currentStatus" in initialData
+            ? validateCurrentStatus(initialData.currentStatus)
+            : initialValidationData.currentStatus,
+        futurePlans:
+          "futurePlans" in initialData
+            ? validateFuturePlans(initialData.futurePlans)
+            : initialValidationData.futurePlans,
+        subscription:
+          "subscription" in initialData
+            ? validateSubscription(initialData.subscription)
+            : initialValidationData.subscription,
+      },
+      isCompleted:
+        "basicInfo" in initialData &&
+        initialData.basicInfo.status === ProgressStatus.COMPLETED,
+    });
+  },
 
   setModalOpen: (isOpen) => set({ isModalOpen: isOpen }),
   setCompleted: (isCompleted) => set({ isCompleted }),

@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { lucia, validateRequest } from "../actions/auth";
+import { lucia, validateRequest } from "../../actions/auth";
 import { redirect } from "next/navigation";
 import { prismaClient } from "@/lib/prismaClient";
 import { hash, verify } from "@node-rs/argon2";
