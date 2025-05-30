@@ -1,4 +1,6 @@
+import { logout } from "@/app/(auth)/actions";
 import { Input } from "@/components/ui/input";
+import { useSession } from "@/provider/SessionProvider";
 import {
   Bell,
   Search,
@@ -14,7 +16,9 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 interface NavbarProps {
   onMenuToggle: () => void;
@@ -23,6 +27,8 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onMenuToggle, isSidebarExpanded }) => {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const { user } = useSession();
+
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState<boolean>(false);
@@ -76,6 +82,17 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuToggle, isSidebarExpanded }) => {
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
+  const router = useRouter();
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Logout successfully");
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Error while logout. Try again later.");
+    }
+  };
 
   // Mock notifications data
   const notifications = [
@@ -232,7 +249,11 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuToggle, isSidebarExpanded }) => {
               aria-label="Profile menu"
             >
               <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">SC</span>
+                <span className="text-white text-sm font-medium">
+                  {user.profileImageUrl
+                    ? user.profileImageUrl
+                    : user.name.slice(0, 1)}
+                </span>
               </div>
               <ChevronDown size={14} className="text-gray-500" />
             </button>
@@ -242,15 +263,19 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuToggle, isSidebarExpanded }) => {
               <div className="absolute right-0 top-10 w-64 bg-card border border-border rounded-lg shadow-lg z-50">
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-card-foreground rounded-full flex items-center justify-center">
-                      <span className="text-primary font-medium">SC</span>
+                    <div className="w-10 h-10 bg-card rounded-full border-border border flex items-center justify-center">
+                      <span className="text-primary font-medium">
+                        {user.profileImageUrl
+                          ? user.profileImageUrl
+                          : user.name.slice(0, 1)}
+                      </span>
                     </div>
                     <div>
                       <h3 className="font-semibold text-primary">
-                        Sophia Chen
+                        {user?.name ? user.name : "unknown"}
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        sophia@devix.com
+                        {user?.email}
                       </p>
                     </div>
                   </div>
@@ -258,18 +283,18 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuToggle, isSidebarExpanded }) => {
                 <div className="py-2">
                   <button className="flex items-center gap-3 px-4 py-2 text-sm text-primary hover:bg-secondary light:hover:bg-gray-50 w-full text-left">
                     <UserCircle size={16} />
-                    My Profile
+                    Profile
                   </button>
                   <button className="flex items-center gap-3 px-4 py-2 text-primary hover:bg-secondary light:hover:bg-gray-50 w-full text-left">
                     <Settings size={16} />
                     Account Settings
                   </button>
-                  <button className="flex items-center gap-3 px-4 py-2 text-primary hover:bg-secondary light:hover:bg-gray-50 w-full text-left">
-                    <HelpCircle size={16} />
-                    Help & Support
-                  </button>
+
                   <hr className="my-2 border-border" />
-                  <button className="flex items-center gap-3 px-4 py-2 text-primary hover:bg-secondary light:hover:bg-gray-50 w-full text-left">
+                  <button
+                    className="flex items-center gap-3 px-4 py-2 text-primary hover:bg-secondary light:hover:bg-gray-50 w-full text-left"
+                    onClick={handleLogout}
+                  >
                     <LogOut size={16} />
                     Sign Out
                   </button>

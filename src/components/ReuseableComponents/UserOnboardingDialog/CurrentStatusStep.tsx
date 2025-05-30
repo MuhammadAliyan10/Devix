@@ -19,8 +19,7 @@ type Props = {};
 type CurrentSubject = {
   name: string;
   progress: number;
-  resourcesAssigned: string[];
-  quizzesCompleted: string[];
+  quizIds: string[];
 };
 
 type Extracurricular = {
@@ -41,14 +40,13 @@ export default function CurrentStatusStep(props: Props) {
   const { formData, getStepValidationErrors, updateCurrentStatusField } =
     useDevixStore();
   const errors = getStepValidationErrors("currentStatus");
-  const { currentSubjects, currentGPA, extracurriculars, internships } =
+  const { currentSubjects, extracurriculars, internships } =
     formData.currentStatus;
 
   const [newSubject, setNewSubject] = React.useState<CurrentSubject>({
     name: "",
     progress: 0,
-    resourcesAssigned: [],
-    quizzesCompleted: [],
+    quizIds: [],
   });
   const [newExtracurricular, setNewExtracurricular] =
     React.useState<Extracurricular>({ name: "", role: "", duration: "" });
@@ -70,8 +68,7 @@ export default function CurrentStatusStep(props: Props) {
       setNewSubject({
         name: "",
         progress: 0,
-        resourcesAssigned: [],
-        quizzesCompleted: [],
+        quizIds: [],
       });
     }
   };
@@ -171,7 +168,7 @@ export default function CurrentStatusStep(props: Props) {
                 className={cn(
                   "bg-background border-border h-9 text-sm",
                   errors[`currentSubjects_${index}_name`] &&
-                    "border-destructive focus-visible:ring-destructive"
+                    "border-destructive-error"
                 )}
                 placeholder="e.g., Calculus"
               />
@@ -189,7 +186,11 @@ export default function CurrentStatusStep(props: Props) {
                   updatedSubjects[index].progress = Number(e.target.value);
                   updateCurrentStatusField("currentSubjects", updatedSubjects);
                 }}
-                className="bg-background border-border h-9 text-sm"
+                className={cn(
+                  "bg-background border-border h-9 text-sm",
+                  errors[`currentSubjects_${index}_progress`] &&
+                    "border-destructive-error"
+                )}
                 placeholder="e.g., 75"
                 min="0"
                 max="100"
@@ -254,38 +255,6 @@ export default function CurrentStatusStep(props: Props) {
         </div>
       </div>
 
-      {/* Current GPA */}
-      <div className="space-y-2">
-        <Label
-          htmlFor="currentGPA"
-          className={cn(errors.currentGPA && "text-destructive", "text-sm")}
-        >
-          Current GPA
-        </Label>
-        {errors.currentGPA && (
-          <p className="text-xs text-destructive">{errors.currentGPA}</p>
-        )}
-        <Input
-          id="currentGPA"
-          name="currentGPA"
-          type="number"
-          step="0.01"
-          value={currentGPA || ""}
-          onChange={(e) =>
-            updateCurrentStatusField(
-              "currentGPA",
-              Number(e.target.value) || undefined
-            )
-          }
-          className={cn(
-            "bg-background border-border h-9 text-sm",
-            errors.currentGPA &&
-              "border-destructive focus-visible:ring-destructive"
-          )}
-          placeholder="e.g., 3.5"
-        />
-      </div>
-
       {/* Extracurriculars */}
       <div className="space-y-3">
         <h3 className="text-base font-semibold text-foreground">
@@ -308,7 +277,11 @@ export default function CurrentStatusStep(props: Props) {
                     updatedActivities
                   );
                 }}
-                className="bg-background border-border h-9 text-sm"
+                className={cn(
+                  "bg-background border-border h-9 text-sm",
+                  errors[`extracurriculars_${index}_name`] &&
+                    "border-destructive-error"
+                )}
                 placeholder="e.g., Debate Club"
               />
             </div>
@@ -327,7 +300,11 @@ export default function CurrentStatusStep(props: Props) {
                     updatedActivities
                   );
                 }}
-                className="bg-background border-border h-9 text-sm"
+                className={cn(
+                  "bg-background border-border h-9 text-sm",
+                  errors[`extracurriculars_${index}_role`] &&
+                    "border-destructive-error"
+                )}
                 placeholder="e.g., President"
               />
             </div>
@@ -346,7 +323,11 @@ export default function CurrentStatusStep(props: Props) {
                     updatedActivities
                   );
                 }}
-                className="bg-background border-border h-9 text-sm"
+                className={cn(
+                  "bg-background border-border h-9 text-sm",
+                  errors[`extracurriculars_${index}_duration`] &&
+                    "border-destructive-error"
+                )}
                 placeholder="e.g., 2023-Present"
               />
             </div>
@@ -444,7 +425,11 @@ export default function CurrentStatusStep(props: Props) {
                     updatedInternships[index].company = e.target.value;
                     updateCurrentStatusField("internships", updatedInternships);
                   }}
-                  className="bg-background border-border h-9 text-sm"
+                  className={cn(
+                    "bg-background border-border h-9 text-sm",
+                    errors[`internships_${index}_company`] &&
+                      "border-destructive-error"
+                  )}
                   placeholder="e.g., Tech Corp"
                 />
               </div>
@@ -460,7 +445,11 @@ export default function CurrentStatusStep(props: Props) {
                     updatedInternships[index].role = e.target.value;
                     updateCurrentStatusField("internships", updatedInternships);
                   }}
-                  className="bg-background border-border h-9 text-sm"
+                  className={cn(
+                    "bg-background border-border h-9 text-sm",
+                    errors[`internships_${index}_role`] &&
+                      "border-destructive-error"
+                  )}
                   placeholder="e.g., Software Intern"
                 />
               </div>
@@ -477,7 +466,11 @@ export default function CurrentStatusStep(props: Props) {
                     updatedInternships[index].startDate = e.target.value;
                     updateCurrentStatusField("internships", updatedInternships);
                   }}
-                  className="bg-background border-border h-9 text-sm"
+                  className={cn(
+                    "bg-background border-border h-9 text-sm",
+                    errors[`internships_${index}_startDate`] &&
+                      "border-destructive-error"
+                  )}
                 />
               </div>
               <div className="space-y-1">

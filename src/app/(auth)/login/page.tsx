@@ -29,6 +29,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Github, Loader2, PhoneCall } from "lucide-react";
+import { login } from "../actions";
+import { toast } from "sonner";
 
 // Form schema for validation
 const formSchema = z.object({
@@ -58,15 +60,21 @@ export default function LoginPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      console.log(values);
+
+    try {
+      const res = await login(values.email, values.password);
+      if (!res.success) {
+        return toast.error(res.message);
+      }
+      toast.success("Login successfully.");
+    } catch (error) {
+      console.log(error);
+      toast.error("Internal server error.");
+    } finally {
       setIsLoading(false);
-      // Redirect after successful login
-      router.push("/dashboard");
-    }, 1500);
+    }
   }
 
   if (!mounted) {

@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, Check, ChevronRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useDevixStore } from "@/store/useDevixStore";
@@ -26,6 +25,7 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [validationError, setValidationError] = useState<string | null>("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleBack = () => {
@@ -46,8 +46,18 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
     }
 
     if (!completedSteps.includes(currentStep.id)) {
-      setCompletedSteps([...completedSteps, currentStep.id]);
+      setIsLoading(true);
+      setTimeout(() => {
+        setCompletedSteps([...completedSteps, currentStep.id]);
+        setIsLoading(false);
+        proceedToNextStep();
+      }, 1500);
+    } else {
+      proceedToNextStep();
     }
+  };
+
+  const proceedToNextStep = () => {
     if (isLastStep) {
       try {
         setSubmitting(true);
@@ -71,7 +81,7 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
   return (
     <div className="flex flex-col bg-background border border-border rounded-3xl max-w-7xl backdrop-blur-[106px]">
       <div className="grid grid-cols-12">
-        <div className="col-span-3 p-6 flex items-center justify-center border-r border-border">
+        <div className="col-span-4 p-6 flex items-center justify-center border-r border-border">
           <div className="space-y-6">
             {steps.map((step, index) => {
               const isCompleted = completedSteps.includes(step.id);
@@ -155,7 +165,7 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
           </div>
         </div>
 
-        <div className="col-span-9 overflow-y-auto">
+        <div className="col-span-8 overflow-y-auto max-h-[calc(100vh-200px)]">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep.id}
@@ -173,12 +183,23 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
                   {currentStep.description}
                 </p>
               </div>
-              {currentStep.component}
-              {validationError && (
-                <div className="mt-4 p-3 bg-destructive/10 border border-destructive rounded-md flex items-center gap-2 text-destructive">
-                  <AlertCircle className="h-5 w-5" />
-                  <p className="text-sm">{validationError}</p>
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                  <Loader2 className="animate-spin h-8 w-8 text-primary" />
+                  <p className="text-sm text-muted-foreground">
+                    Storing and analyzing data for AI...
+                  </p>
                 </div>
+              ) : (
+                <>
+                  {currentStep.component}
+                  {validationError && (
+                    <div className="mt-4 p-3 bg-destructive/10 border border-destructive rounded-md flex items-center gap-2 text-destructive">
+                      <AlertCircle className="h-5 w-5" />
+                      <p className="text-sm">{validationError}</p>
+                    </div>
+                  )}
+                </>
               )}
             </motion.div>
           </AnimatePresence>
@@ -188,7 +209,7 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
         <Button
           variant="outline"
           onClick={handleBack}
-          disabled={isSubmitting}
+          disabled={isSubmitting || isLoading}
           className={cn(
             "border-border text-primary hover:bg-muted",
             isFirstStep && "opacity-50 cursor-not-allowed"
@@ -196,7 +217,7 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
         >
           {isFirstStep ? "Cancel" : "Back"}
         </Button>
-        <Button onClick={handleNext} disabled={isSubmitting}>
+        <Button onClick={handleNext} disabled={isSubmitting || isLoading}>
           {isLastStep ? (
             isSubmitting ? (
               <>

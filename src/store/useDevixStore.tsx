@@ -6,88 +6,13 @@ import {
   validateFuturePlans,
   validateSubscription,
   ValidationErrors,
-  ActivityType,
+  DevixFormState,
+  ProgressStatus,
   UserStatus,
   UserExperience,
-  ProgressStatus,
   SubscriptionPlan,
   LearningStyle,
 } from "@/lib/types";
-
-export type DevixFormState = {
-  basicInfo: {
-    name: string;
-    currentSemester: number;
-    degree: string;
-    major: string;
-    institution: string;
-    about?: string;
-    status: string;
-    userStatus: UserStatus;
-    userExperience: UserExperience;
-  };
-  academicHistory: {
-    previousSemesters: {
-      semester: number;
-      year: number;
-      subjects: {
-        name: string;
-        grade?: string;
-        status: string;
-        resourceIds: string[];
-      }[];
-      gpa?: number;
-    }[];
-    priorEducation: {
-      level: string;
-      institution: string;
-      yearCompleted: number;
-      grades?: string;
-    }[];
-    skills: string[];
-    certifications: {
-      name: string;
-      issuer: string;
-      year: number;
-      certificateId?: string;
-    }[];
-  };
-  currentStatus: {
-    currentSubjects: {
-      name: string;
-      progress: number;
-      resourcesAssigned: string[];
-      quizzesCompleted: string[];
-    }[];
-    currentGPA?: number;
-    extracurriculars: {
-      name: string;
-      role: string;
-      duration: string;
-    }[];
-    internships: {
-      company: string;
-      role: string;
-      startDate: string;
-      endDate?: string;
-      skillsGained: string[];
-    }[];
-  };
-  futurePlans: {
-    careerGoals: string[];
-    careerInterests: string[];
-    preferredLearningStyle: LearningStyle;
-    timeAvailability: {
-      hoursPerWeek: number;
-      preferredDays: string[];
-    };
-    targetCompletionDate?: string;
-  };
-  subscription: {
-    plan: SubscriptionPlan;
-    priceId?: string;
-  };
-};
 
 const initialState: DevixFormState = {
   basicInfo: {
@@ -109,7 +34,6 @@ const initialState: DevixFormState = {
   },
   currentStatus: {
     currentSubjects: [],
-    currentGPA: undefined,
     extracurriculars: [],
     internships: [],
   },
@@ -202,7 +126,6 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
     set((state) => {
       const newBasicInfo = { ...state.formData.basicInfo, [field]: value };
       const validateResult = validateBasicInfo(newBasicInfo);
-      // Update academicHistory validation as it depends on currentSemester
       const academicHistoryValidation = validateAcademicHistory(
         state.formData.academicHistory,
         newBasicInfo.currentSemester
@@ -305,16 +228,13 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
     return validationResult.valid;
   },
 
-  getStepValidationErrors: (stepId: keyof DevixFormState) => {
+  getStepValidationErrors: (stepId) => {
     return get().validation[stepId].errors;
   },
 
-  addSkill: (skill: string) =>
+  addSkill: (skill) => {
     set((state) => {
-      const newSkills = [
-        ...(state.formData.academicHistory.skills || []),
-        skill,
-      ];
+      const newSkills = [...state.formData.academicHistory.skills, skill];
       const newAcademicHistory = {
         ...state.formData.academicHistory,
         skills: newSkills,
@@ -327,11 +247,12 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
         formData: { ...state.formData, academicHistory: newAcademicHistory },
         validation: { ...state.validation, academicHistory: validateResult },
       };
-    }),
+    });
+  },
 
-  removeSkill: (skillToRemove: string) =>
+  removeSkill: (skillToRemove) => {
     set((state) => {
-      const newSkills = (state.formData.academicHistory.skills || []).filter(
+      const newSkills = state.formData.academicHistory.skills.filter(
         (skill) => skill !== skillToRemove
       );
       const newAcademicHistory = {
@@ -346,14 +267,12 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
         formData: { ...state.formData, academicHistory: newAcademicHistory },
         validation: { ...state.validation, academicHistory: validateResult },
       };
-    }),
+    });
+  },
 
-  addCareerGoal: (goal: string) =>
+  addCareerGoal: (goal) => {
     set((state) => {
-      const newGoals = [
-        ...(state.formData.futurePlans.careerGoals || []),
-        goal,
-      ];
+      const newGoals = [...state.formData.futurePlans.careerGoals, goal];
       const newFuturePlans = {
         ...state.formData.futurePlans,
         careerGoals: newGoals,
@@ -363,11 +282,12 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
         formData: { ...state.formData, futurePlans: newFuturePlans },
         validation: { ...state.validation, futurePlans: validateResult },
       };
-    }),
+    });
+  },
 
-  removeCareerGoal: (goalToRemove: string) =>
+  removeCareerGoal: (goalToRemove) => {
     set((state) => {
-      const newGoals = (state.formData.futurePlans.careerGoals || []).filter(
+      const newGoals = state.formData.futurePlans.careerGoals.filter(
         (goal) => goal !== goalToRemove
       );
       const newFuturePlans = {
@@ -379,12 +299,13 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
         formData: { ...state.formData, futurePlans: newFuturePlans },
         validation: { ...state.validation, futurePlans: validateResult },
       };
-    }),
+    });
+  },
 
-  addCareerInterest: (interest: string) =>
+  addCareerInterest: (interest) => {
     set((state) => {
       const newInterests = [
-        ...(state.formData.futurePlans.careerInterests || []),
+        ...state.formData.futurePlans.careerInterests,
         interest,
       ];
       const newFuturePlans = {
@@ -396,13 +317,14 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
         formData: { ...state.formData, futurePlans: newFuturePlans },
         validation: { ...state.validation, futurePlans: validateResult },
       };
-    }),
+    });
+  },
 
-  removeCareerInterest: (interestToRemove: string) =>
+  removeCareerInterest: (interestToRemove) => {
     set((state) => {
-      const newInterests = (
-        state.formData.futurePlans.careerInterests || []
-      ).filter((interest) => interest !== interestToRemove);
+      const newInterests = state.formData.futurePlans.careerInterests.filter(
+        (interest) => interest !== interestToRemove
+      );
       const newFuturePlans = {
         ...state.formData.futurePlans,
         careerInterests: newInterests,
@@ -412,7 +334,8 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
         formData: { ...state.formData, futurePlans: newFuturePlans },
         validation: { ...state.validation, futurePlans: validateResult },
       };
-    }),
+    });
+  },
 
   resetForm: () =>
     set({

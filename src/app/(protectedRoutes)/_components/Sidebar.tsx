@@ -1,3 +1,4 @@
+import { logout } from "@/app/(auth)/actions";
 import {
   BookOpen,
   BarChart3,
@@ -30,7 +31,9 @@ import {
   Heart,
   Star,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 interface NavItem {
   name: string;
@@ -152,6 +155,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
       setIsMobileMenuOpen(false);
     }
   };
+  const router = useRouter();
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Logout successfully");
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Error while logout. Try again later.");
+    }
+  };
 
   const renderNavItem = (item: NavItem, isChild: boolean = false) => {
     const isActive = activePage === item.name;
@@ -200,7 +214,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
         </button>
         {hasChildren && (isExpanded || isMobile) && isSectionExpanded && (
           <div className="py-1">
-            {item.children.map((child) => renderNavItem(child, true))}
+            {item.children?.map((child) => renderNavItem(child, true))}
           </div>
         )}
       </div>
@@ -236,6 +250,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
             !isExpanded && !isMobile && "justify-center px-2"
           }`}
           aria-label="Logout"
+          onClick={handleLogout}
         >
           <LogOut
             size={18}

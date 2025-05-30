@@ -1,10 +1,7 @@
-// types.ts
-
 export type ValidationErrors = {
   [key: string]: string;
 };
 
-// Enums matching Prisma schema
 export enum ActivityType {
   READING = "READING",
   VIDEO = "VIDEO",
@@ -14,13 +11,13 @@ export enum ActivityType {
 export enum UserStatus {
   STUDENT = "STUDENT",
   GRADUATE = "GRADUATE",
-  WORKER = "WORKER",
+  PROFESSIONAL = "PROFESSIONAL",
 }
 
 export enum UserExperience {
   FRESHER = "FRESHER",
+  INTERMEDIATE = "INTERMEDIATE",
   EXPERIENCED = "EXPERIENCED",
-  INTERN = "INTERN",
 }
 
 export enum ProgressStatus {
@@ -31,8 +28,8 @@ export enum ProgressStatus {
 
 export enum SubscriptionPlan {
   FREE = "FREE",
-  BASIC = "BASIC",
   PREMIUM = "PREMIUM",
+  ENTERPRISE = "ENTERPRISE",
 }
 
 export enum LearningStyle {
@@ -41,7 +38,78 @@ export enum LearningStyle {
   INTERACTIVE = "INTERACTIVE",
 }
 
-// Validation functions
+export type DevixFormState = {
+  basicInfo: {
+    name: string;
+    currentSemester: number;
+    degree: string;
+    major: string;
+    institution: string;
+    about?: string;
+    status: ProgressStatus;
+    userStatus: UserStatus;
+    userExperience: UserExperience;
+  };
+  academicHistory: {
+    previousSemesters: {
+      semester: number;
+      year: number;
+      subjects: {
+        name: string;
+        grade?: string;
+        status: ProgressStatus;
+      }[];
+      gpa?: number;
+    }[];
+    priorEducation: {
+      level: string;
+      institution: string;
+      yearCompleted: number;
+      grades?: string;
+    }[];
+    skills: string[];
+    certifications: {
+      name: string;
+      issuer: string;
+      year: number;
+      certificateId?: string;
+    }[];
+  };
+  currentStatus: {
+    currentSubjects: {
+      name: string;
+      progress: number;
+      quizIds: string[];
+    }[];
+    extracurriculars: {
+      name: string;
+      role: string;
+      duration: string;
+    }[];
+    internships: {
+      company: string;
+      role: string;
+      startDate: string;
+      endDate?: string;
+      skillsGained: string[];
+    }[];
+  };
+  futurePlans: {
+    careerGoals: string[];
+    careerInterests: string[];
+    preferredLearningStyle: LearningStyle;
+    timeAvailability: {
+      hoursPerWeek: number;
+      preferredDays: string[];
+    };
+    targetCompletionDate?: string;
+  };
+  subscription: {
+    plan: SubscriptionPlan;
+    priceId?: string;
+  };
+};
+
 export const validateBasicInfo = (
   basicInfo: DevixFormState["basicInfo"]
 ): { valid: boolean; errors: ValidationErrors } => {
@@ -52,7 +120,6 @@ export const validateBasicInfo = (
     errors.name = "Name is required";
     valid = false;
   }
-
   if (basicInfo.currentSemester <= 0) {
     errors.currentSemester = "Current semester must be a positive number";
     valid = false;
@@ -72,62 +139,38 @@ export const validateBasicInfo = (
 
   return { valid, errors };
 };
+
 export const validateAcademicHistory = (
   academicHistory: DevixFormState["academicHistory"],
-  currentSemester: number // Add this parameter
+  currentSemester: number
 ): { valid: boolean; errors: ValidationErrors } => {
   const errors: ValidationErrors = {};
   let valid = true;
 
-  // Skip validation if current semester is 1 or less
-  if (currentSemester <= 1) {
-    return { valid: true, errors: {} };
-  }
-
-  // Only require previous semesters if current semester > 1
-  if (academicHistory.previousSemesters.length === 0) {
+  if (currentSemester > 1 && academicHistory.previousSemesters.length === 0) {
     errors.previousSemesters =
       "At least one previous semester is required for students beyond 1st semester";
     valid = false;
   }
 
   academicHistory.previousSemesters.forEach((sem, index) => {
-    // Remove the requirement for subjects - make it optional
-    // if (!sem.subjects || sem.subjects.length === 0) {
-    //   errors[
-    //     `previousSemesters_${index}_subjects`
-    //   ] = `Subjects for semester ${sem.semester} are required`;
-    //   valid = false;
-    // }
-
     if (!sem.year || sem.year < 2000 || sem.year > new Date().getFullYear()) {
       errors[
         `previousSemesters_${index}_year`
       ] = `Valid year for semester ${sem.semester} is required`;
       valid = false;
     }
-
     if (!sem.semester || sem.semester <= 0 || sem.semester >= currentSemester) {
       errors[
         `previousSemesters_${index}_semester`
       ] = `Semester number must be between 1 and ${currentSemester - 1}`;
       valid = false;
     }
-
     sem.subjects.forEach((subject, subIndex) => {
       if (!subject.name) {
         errors[
           `previousSemesters_${index}_subjects_${subIndex}_name`
         ] = `Subject name for semester ${sem.semester} is required`;
-        valid = false;
-      }
-      if (
-        subject.status &&
-        !["completed", "incomplete", "missed"].includes(subject.status)
-      ) {
-        errors[
-          `previousSemesters_${index}_subjects_${subIndex}_status`
-        ] = `Invalid status for subject in semester ${sem.semester}`;
         valid = false;
       }
     });
@@ -231,9 +274,7 @@ export const validateFuturePlans = (
   }
   if (
     !futurePlans.preferredLearningStyle ||
-    !Object.values(LearningStyle).includes(
-      futurePlans.preferredLearningStyle as LearningStyle
-    )
+    !Object.values(LearningStyle).includes(futurePlans.preferredLearningStyle)
   ) {
     errors.preferredLearningStyle = "Valid learning style is required";
     valid = false;
@@ -273,81 +314,4 @@ export const validateSubscription = (
   }
 
   return { valid, errors };
-};
-
-// Form state type matching Prisma schema
-export type DevixFormState = {
-  basicInfo: {
-    name: string;
-
-    currentSemester: number;
-    degree: string;
-    major: string;
-    institution: string;
-    about?: string;
-    status: string;
-    userStatus: UserStatus;
-    userExperience: UserExperience;
-  };
-  academicHistory: {
-    previousSemesters: {
-      semester: number;
-      year: number;
-      subjects: {
-        name: string;
-        grade?: string;
-        status: string;
-        resourceIds: string[];
-      }[];
-      gpa?: number;
-    }[];
-    priorEducation: {
-      level: string;
-      institution: string;
-      yearCompleted: number;
-      grades?: string;
-    }[];
-    skills: string[];
-    certifications: {
-      name: string;
-      issuer: string;
-      year: number;
-      certificateId?: string;
-    }[];
-  };
-  currentStatus: {
-    currentSubjects: {
-      name: string;
-      progress: number;
-      resourcesAssigned: string[];
-      quizzesCompleted: string[];
-    }[];
-    currentGPA?: number;
-    extracurriculars: {
-      name: string;
-      role: string;
-      duration: string;
-    }[];
-    internships: {
-      company: string;
-      role: string;
-      startDate: string;
-      endDate?: string;
-      skillsGained: string[];
-    }[];
-  };
-  futurePlans: {
-    careerGoals: string[];
-    careerInterests: string[];
-    preferredLearningStyle: LearningStyle;
-    timeAvailability: {
-      hoursPerWeek: number;
-      preferredDays: string[];
-    };
-    targetCompletionDate?: string;
-  };
-  subscription: {
-    plan: SubscriptionPlan;
-    priceId?: string;
-  };
 };

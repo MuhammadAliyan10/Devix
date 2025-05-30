@@ -12,14 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { ProgressStatus } from "@/lib/types";
 
 type Props = {};
 
 type SemesterSubject = {
   name: string;
   grade?: string;
-  status: string;
-  resourceIds: string[];
+  status: ProgressStatus;
 };
 
 type PreviousSemester = {
@@ -51,8 +51,7 @@ export default function AcademicBackground(props: Props) {
       newSubjects[semesterIndex] || {
         name: "",
         grade: "",
-        status: "completed",
-        resourceIds: [],
+        status: ProgressStatus.COMPLETED,
       }
     );
   };
@@ -85,7 +84,6 @@ export default function AcademicBackground(props: Props) {
     );
     updateAcademicHistoryField("previousSemesters", updatedSemesters);
 
-    // Clean up new subjects for this semester
     const updatedNewSubjects = { ...newSubjects };
     delete updatedNewSubjects[semesterIndex];
     setNewSubjects(updatedNewSubjects);
@@ -101,12 +99,10 @@ export default function AcademicBackground(props: Props) {
       };
       updateAcademicHistoryField("previousSemesters", updatedSemesters);
 
-      // Reset the new subject for this semester
       setNewSubject(semesterIndex, {
         name: "",
         grade: "",
-        status: "completed",
-        resourceIds: [],
+        status: ProgressStatus.COMPLETED,
       });
     }
   };
@@ -373,13 +369,13 @@ export default function AcademicBackground(props: Props) {
                     />
 
                     <Select
-                      value={subject.status || "completed"}
+                      value={subject.status || ProgressStatus.COMPLETED}
                       onValueChange={(value) =>
                         handleSubjectFieldChange(
                           semesterIndex,
                           subjectIndex,
                           "status",
-                          value
+                          value as ProgressStatus
                         )
                       }
                     >
@@ -387,9 +383,11 @@ export default function AcademicBackground(props: Props) {
                         <SelectValue placeholder="Status" />
                       </SelectTrigger>
                       <SelectContent className="bg-background border-border text-sm">
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="incomplete">Incomplete</SelectItem>
-                        <SelectItem value="missed">Missed</SelectItem>
+                        {Object.values(ProgressStatus).map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
 
@@ -406,7 +404,6 @@ export default function AcademicBackground(props: Props) {
                   </div>
                 ))}
 
-                {/* Add new subject row */}
                 <div className="flex items-center gap-2 pt-2 border-t border-border">
                   <div className="flex-1">
                     <Input
@@ -439,7 +436,7 @@ export default function AcademicBackground(props: Props) {
                     onValueChange={(value) =>
                       setNewSubject(semesterIndex, {
                         ...getNewSubject(semesterIndex),
-                        status: value,
+                        status: value as ProgressStatus,
                       })
                     }
                   >
@@ -447,9 +444,11 @@ export default function AcademicBackground(props: Props) {
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent className="bg-background border-border text-sm">
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="incomplete">Incomplete</SelectItem>
-                      <SelectItem value="missed">Missed</SelectItem>
+                      {Object.values(ProgressStatus).map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
 
@@ -466,7 +465,6 @@ export default function AcademicBackground(props: Props) {
             </div>
           ))}
 
-          {/* Add New Semester Section */}
           <div className="space-y-4 p-4 border border-dashed border-border rounded-lg">
             <h4 className="text-sm font-medium text-foreground">
               Add New Semester

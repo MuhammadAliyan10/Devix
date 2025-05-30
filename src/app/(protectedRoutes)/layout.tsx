@@ -1,40 +1,21 @@
-"use client";
-import React, { useState } from "react";
-import Navbar from "./_components/Navbar";
-import Sidebar from "./_components/Sidebar";
+import { validateRequest } from "@/app/actions/auth";
+import { redirect } from "next/navigation";
+import ClientLayout from "./ClientLayout";
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+export default async function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { user, session } = await validateRequest();
 
-  const toggleSidebar = () => {
-    setIsExpanded((prev) => !prev);
-  };
+  if (!session || !user) {
+    redirect("/login");
+  }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <div className="fixed top-0 left-0 h-screen z-30">
-        <Sidebar isExpanded={isExpanded} toggleSidebar={toggleSidebar} />
-      </div>
-
-      <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${
-          isExpanded ? "ml-64" : "ml-16"
-        }`}
-      >
-        <div
-          className={`fixed top-0 z-20 transition-all duration-300 ${
-            isExpanded ? "left-64" : "left-16"
-          } right-0`}
-        >
-          <Navbar onMenuToggle={toggleSidebar} isSidebarExpanded={isExpanded} />
-        </div>
-
-        <main className="flex-1 overflow-y-auto pt-16 pl-4 pr-4 pb-4">
-          {children}
-        </main>
-      </div>
-    </div>
+    <ClientLayout user={user} session={session}>
+      {children}
+    </ClientLayout>
   );
-};
-
-export default Layout;
+}

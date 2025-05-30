@@ -21,6 +21,10 @@ const FuturePlansStep = (props: Props) => {
     formData,
     updateFuturePlansField,
     getStepValidationErrors,
+    addCareerGoal,
+    removeCareerGoal,
+    addCareerInterest,
+    removeCareerInterest,
     setCompleted,
   } = useDevixStore();
   const { futurePlans } = formData;
@@ -29,40 +33,6 @@ const FuturePlansStep = (props: Props) => {
   const [newCareerGoal, setNewCareerGoal] = useState("");
   const [newCareerInterest, setNewCareerInterest] = useState("");
   const [newPreferredDay, setNewPreferredDay] = useState("");
-
-  const handleAddCareerGoal = () => {
-    if (newCareerGoal.trim()) {
-      updateFuturePlansField("careerGoals", [
-        ...futurePlans.careerGoals,
-        newCareerGoal,
-      ]);
-      setNewCareerGoal("");
-    }
-  };
-
-  const handleRemoveCareerGoal = (goal: string) => {
-    updateFuturePlansField(
-      "careerGoals",
-      futurePlans.careerGoals.filter((g) => g !== goal)
-    );
-  };
-
-  const handleAddCareerInterest = () => {
-    if (newCareerInterest.trim()) {
-      updateFuturePlansField("careerInterests", [
-        ...futurePlans.careerInterests,
-        newCareerInterest,
-      ]);
-      setNewCareerInterest("");
-    }
-  };
-
-  const handleRemoveCareerInterest = (interest: string) => {
-    updateFuturePlansField(
-      "careerInterests",
-      futurePlans.careerInterests.filter((i) => i !== interest)
-    );
-  };
 
   const handleAddPreferredDay = () => {
     if (newPreferredDay.trim()) {
@@ -115,7 +85,7 @@ const FuturePlansStep = (props: Props) => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => handleRemoveCareerGoal(goal)}
+                onClick={() => removeCareerGoal(goal)}
                 className="text-destructive hover:text-destructive/80 h-9 w-9"
               >
                 <Trash2 size={14} />
@@ -131,7 +101,12 @@ const FuturePlansStep = (props: Props) => {
             />
             <Button
               size="icon"
-              onClick={handleAddCareerGoal}
+              onClick={() => {
+                if (newCareerGoal.trim()) {
+                  addCareerGoal(newCareerGoal);
+                  setNewCareerGoal("");
+                }
+              }}
               disabled={!newCareerGoal.trim()}
               className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 w-9 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -160,7 +135,7 @@ const FuturePlansStep = (props: Props) => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => handleRemoveCareerInterest(interest)}
+                onClick={() => removeCareerInterest(interest)}
                 className="text-destructive hover:text-destructive/80 h-9 w-9"
               >
                 <Trash2 size={14} />
@@ -171,14 +146,18 @@ const FuturePlansStep = (props: Props) => {
             <Input
               value={newCareerInterest}
               onChange={(e) => setNewCareerInterest(e.target.value)}
-              className="bg-background border-border h-9 text-sm"
+              className="bg-background text"
               placeholder="Add new career interest"
             />
             <Button
-              size="icon"
-              onClick={handleAddCareerInterest}
+              size="sm"
+              onClick={() => {
+                if (newCareerInterest.trim()) {
+                  addCareerInterest(newCareerInterest);
+                  setNewCareerInterest("");
+                }
+              }}
               disabled={!newCareerInterest.trim()}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 w-9 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus size={14} />
             </Button>
@@ -218,11 +197,11 @@ const FuturePlansStep = (props: Props) => {
             <SelectValue placeholder="Select learning style" />
           </SelectTrigger>
           <SelectContent className="bg-background border-border text-sm">
-            <SelectItem value={LearningStyle.VIDEO}>Video</SelectItem>
-            <SelectItem value={LearningStyle.TEXT}>Text</SelectItem>
-            <SelectItem value={LearningStyle.INTERACTIVE}>
-              Interactive
-            </SelectItem>
+            {Object.values(LearningStyle).map((style) => (
+              <SelectItem key={style} value={style}>
+                {style}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -337,7 +316,10 @@ const FuturePlansStep = (props: Props) => {
           type="date"
           value={futurePlans.targetCompletionDate || ""}
           onChange={(e) =>
-            updateFuturePlansField("targetCompletionDate", e.target.value)
+            updateFuturePlansField(
+              "targetCompletionDate",
+              e.target.value || undefined
+            )
           }
           className={cn(
             "bg-background border-border h-9 text-sm",

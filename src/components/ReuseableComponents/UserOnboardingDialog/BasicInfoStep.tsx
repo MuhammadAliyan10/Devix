@@ -1,7 +1,7 @@
 import React from "react";
 
 import { cn } from "@/lib/utils";
-import { UserStatus, UserExperience } from "@/lib/types";
+import { UserStatus, UserExperience, ProgressStatus } from "@/lib/types";
 import { useDevixStore } from "@/store/useDevixStore";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -27,17 +27,19 @@ export default function BasicInfoStep(props: Props) {
     major,
     institution,
     about,
+    status,
     userStatus,
     userExperience,
   } = formData.basicInfo;
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    updateBasicInfoField(name as keyof typeof formData.basicInfo, value);
+    updateBasicInfoField(
+      name as keyof typeof formData.basicInfo,
+      name === "currentSemester" ? Number(value) : value
+    );
   };
 
   return (
@@ -163,6 +165,35 @@ export default function BasicInfoStep(props: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label
+            htmlFor="status"
+            className={cn(errors.status && "text-destructive")}
+          >
+            Progress Status <span className="text-destructive">*</span>
+          </Label>
+          {errors.status && (
+            <p className="text-sm text-destructive">{errors.status}</p>
+          )}
+          <Select
+            value={status || ProgressStatus.NOT_STARTED}
+            onValueChange={(value) =>
+              updateBasicInfoField("status", value as ProgressStatus)
+            }
+          >
+            <SelectTrigger className="bg-background border-border">
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent className="bg-background border-border">
+              {Object.values(ProgressStatus).map((status) => (
+                <SelectItem key={status} value={status}>
+                  {status}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label
             htmlFor="userStatus"
             className={cn(errors.userStatus && "text-destructive")}
           >
@@ -189,36 +220,37 @@ export default function BasicInfoStep(props: Props) {
             </SelectContent>
           </Select>
         </div>
-
-        <div className="space-y-2">
-          <Label
-            htmlFor="userExperience"
-            className={cn(errors.userExperience && "text-destructive")}
-          >
-            User Experience <span className="text-destructive">*</span>
-          </Label>
-          {errors.userExperience && (
-            <p className="text-sm text-destructive">{errors.userExperience}</p>
-          )}
-          <Select
-            value={userExperience || UserExperience.FRESHER}
-            onValueChange={(value) =>
-              updateBasicInfoField("userExperience", value as UserExperience)
-            }
-          >
-            <SelectTrigger className="bg-background border-border">
-              <SelectValue placeholder="Select experience" />
-            </SelectTrigger>
-            <SelectContent className="bg-background border-border">
-              {Object.values(UserExperience).map((exp) => (
-                <SelectItem key={exp} value={exp}>
-                  {exp}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
       </div>
+
+      <div className="space-y-2">
+        <Label
+          htmlFor="userExperience"
+          className={cn(errors.userExperience && "text-destructive")}
+        >
+          User Experience <span className="text-destructive">*</span>
+        </Label>
+        {errors.userExperience && (
+          <p className="text-sm text-destructive">{errors.userExperience}</p>
+        )}
+        <Select
+          value={userExperience || UserExperience.FRESHER}
+          onValueChange={(value) =>
+            updateBasicInfoField("userExperience", value as UserExperience)
+          }
+        >
+          <SelectTrigger className="bg-background border-border">
+            <SelectValue placeholder="Select experience" />
+          </SelectTrigger>
+          <SelectContent className="bg-background border-border">
+            {Object.values(UserExperience).map((exp) => (
+              <SelectItem key={exp} value={exp}>
+                {exp}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="about">About</Label>
         <Textarea
