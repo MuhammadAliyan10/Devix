@@ -6,7 +6,6 @@ import { AlertCircle, Check, ChevronRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { useDevixStore } from "@/store/useDevixStore";
 import {
   Dialog,

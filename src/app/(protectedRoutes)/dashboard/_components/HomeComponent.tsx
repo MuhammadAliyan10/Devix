@@ -4,11 +4,11 @@ import TabsComponent from "@/components/ReuseableComponents/ReuseableTabComponen
 import UserOnboardingDialog from "@/components/ReuseableComponents/UserOnboardingDialog";
 import { useSession } from "@/provider/SessionProvider";
 import React from "react";
-import Home from "../tabs/HomeTab";
+import HomeTab from "../tabs/HomeTab";
 import LearningTab from "../tabs/LearningTab";
 import CareerTab from "../tabs/CareerTab";
 import TechInsightsTab from "../tabs/TechInsightsTab";
-import { BarChart, ChartBar } from "lucide-react";
+import { ChartBar } from "lucide-react";
 
 const HomeComponent = () => {
   const { user } = useSession();
@@ -34,7 +34,7 @@ const HomeComponent = () => {
     {
       name: "Overview",
       value: "overview",
-      component: <Home />,
+      component: <HomeTab userId={user.id} />,
     },
     {
       name: "Learning",
@@ -62,7 +62,6 @@ const HomeComponent = () => {
         showSeparator={false}
         rightComponent={<UserOnboardingDialog text="Update Profile" />}
       />
-      <div className="my-4"></div>
       <TabsComponent tabs={tabsValue} defaultValue="overview" />
     </div>
   );

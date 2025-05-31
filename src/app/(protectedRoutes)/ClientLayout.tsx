@@ -4,11 +4,15 @@ import React, { useState } from "react";
 import Navbar from "../../components/LayoutComponents/Navbar";
 import Sidebar from "../../components/LayoutComponents/Sidebar";
 import SessionProvider from "@/provider/SessionProvider";
+import { SubscriptionStatus } from "@prisma/client";
 
 interface User {
   id: string;
   name: string;
   email?: string;
+  major: string;
+  institution: string;
+  subscriptionStatus: SubscriptionStatus;
   profileImageUrl: string | null;
   createdAt?: Date;
 }

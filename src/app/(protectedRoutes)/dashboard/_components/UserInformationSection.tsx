@@ -39,6 +39,8 @@ const UserInformationSection = ({ userId }: Props) => {
         }
         setUserData(res as UserData);
       } catch (error) {
+        console.log(error);
+
         toast.error("Failed to fetch user data.");
       } finally {
         setLoading(false);

@@ -66,7 +66,7 @@ export default function LoginPage() {
         return toast.error(res.message);
       }
       toast.success(res.message);
-      router.push("/home");
+      router.push("/dashboard");
     } catch (error) {
       console.log(error);
       toast.error("Internal server error.");

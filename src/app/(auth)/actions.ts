@@ -80,7 +80,7 @@ export const signup = async (name: string, email: string, password: string) => {
   } catch (error) {
     console.error("Signup error:", error);
 
-    return redirect("/home");
+    return redirect("/dashboard");
   }
 };
 

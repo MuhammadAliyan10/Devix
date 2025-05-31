@@ -5,12 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Target,
-  TrendingUp,
   Award,
   Brain,
   Briefcase,
   Calendar,
-  CheckCircle2,
   ArrowRight,
   Star,
 } from "lucide-react";
@@ -20,7 +18,6 @@ type Props = {
 };
 
 const CareerTab = ({ userId }: Props) => {
-  // Mock data - replace with actual API calls
   const careerGoals = [
     {
       id: 1,
@@ -99,7 +96,7 @@ const CareerTab = ({ userId }: Props) => {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
               <Target className="h-4 w-4 text-primary" />
             </div>
-            Career Goals Progress
+            Career Goals Progress {userId}
           </CardTitle>
         </CardHeader>
         <CardContent>

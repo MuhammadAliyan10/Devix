@@ -1,12 +1,12 @@
 import { Metadata } from "next";
-import HomeComponent from "./_components/HomeComponent";
+import TutorialsPage from "./_components/TutorialsPage";
 
 export const metadata: Metadata = {
-  title: "Dashboard",
+  title: "Tutorials",
 };
 
 const page = () => {
-  return <HomeComponent />;
+  return <TutorialsPage />;
 };
 
 export default page;

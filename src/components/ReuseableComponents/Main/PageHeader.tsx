@@ -1,6 +1,5 @@
 import React from "react";
 import { Separator } from "@/components/ui/separator";
-import { GraduationCap, Sparkles, Users, Settings } from "lucide-react";
 
 type Props = {
   heading?: string;
@@ -77,7 +76,7 @@ const PageHeader = ({
               )}
               {subtitle && (
                 <p
-                  className={`mt-2 text-muted-foreground ${currentSize.subtitle} leading-relaxed`}
+                  className={`mt-1 text-muted-foreground ${currentSize.subtitle} leading-relaxed`}
                 >
                   {subtitle}
                 </p>

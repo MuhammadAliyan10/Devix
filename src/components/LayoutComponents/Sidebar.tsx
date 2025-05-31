@@ -4,9 +4,7 @@ import { motion } from "framer-motion";
 import {
   BookOpen,
   BarChart3,
-  Home,
   NotepadText,
-  Rss,
   User,
   ChevronRight,
   ChevronLeft,
@@ -22,16 +20,16 @@ import {
   Target,
   Calendar,
   MessageCircle,
-  Search,
-  Bookmark,
   TrendingUp,
   Code,
   Brain,
   Zap,
-  Globe,
   Heart,
   Star,
   GraduationCap,
+  SettingsIcon,
+  TrophyIcon,
+  FolderGit2,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import React, { useState, useEffect } from "react";
@@ -114,20 +112,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
         { name: "Quizzes & Tests", icon: NotepadText, path: "/career/quizzes" },
         { name: "Achievements", icon: Star, path: "/career/achievements" },
         { name: "Career Path", icon: Zap, path: "/career/path" },
-      ],
-    },
-    {
-      name: "Technology Hub",
-      icon: Code,
-      section: "dropdown",
-      children: [
-        { name: "Tech News", icon: Rss, path: "/tech/news" },
-        { name: "Developer Blogs", icon: FileText, path: "/tech/blogs" },
-        { name: "Community Forums", icon: Users, path: "/tech/forums" },
-        { name: "Code Snippets", icon: Code, path: "/tech/snippets" },
-        { name: "Tech Events", icon: Calendar, path: "/tech/events" },
-        { name: "Industry Trends", icon: Globe, path: "/tech/trends" },
-        { name: "Bookmarks", icon: Bookmark, path: "/tech/bookmarks" },
+        { name: "Projects", icon: FolderGit2, path: "/career/projects" }, // Added for project tracking
       ],
     },
     {
@@ -139,32 +124,32 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
         { name: "Tutorials", icon: FileText, path: "/learning/tutorials" },
         { name: "Practice Labs", icon: Code, path: "/learning/labs" },
         { name: "Study Groups", icon: Users, path: "/learning/groups" },
-        {
-          name: "Certifications",
-          icon: Trophy,
-          path: "/learning/certifications",
-        },
         { name: "Saved Content", icon: Heart, path: "/learning/saved" },
       ],
     },
     {
-      name: "Social & Networking",
+      name: "Community",
       icon: Users,
       section: "dropdown",
       children: [
-        { name: "My Profile", icon: User, path: "/social/profile" },
-        { name: "Connections", icon: Users, path: "/social/connections" },
-        { name: "Messages", icon: MessageCircle, path: "/social/messages" },
+        { name: "My Profile", icon: User, path: "/community/profile" },
+        { name: "Connections", icon: Users, path: "/community/connections" },
+        { name: "Messages", icon: MessageCircle, path: "/community/messages" },
         {
           name: "Group Discussions",
           icon: MessageCircle,
-          path: "/social/discussions",
+          path: "/community/discussions",
         },
-        { name: "Mentorship", icon: User, path: "/social/mentorship" },
-        { name: "Job Board", icon: Search, path: "/social/jobs" },
+        {
+          name: "Leaderboard",
+          icon: TrophyIcon,
+          path: "/community/leaderboard",
+        }, // Fixed path
+        { name: "Blog Posts", icon: FileText, path: "/community/blogs" }, // Added for blog posts
       ],
     },
     { name: "Calendar", icon: Calendar, section: null, path: "/calendar" },
+    { name: "Settings", icon: SettingsIcon, section: null, path: "/settings" },
     { name: "Help & Support", icon: HelpCircle, section: null, path: "/help" },
   ];
 

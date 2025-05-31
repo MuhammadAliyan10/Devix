@@ -4,11 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  BookOpen,
   Play,
   Clock,
   TrendingUp,
-  Award,
   ArrowRight,
   Code,
   Target,
@@ -73,7 +71,7 @@ const LearningTab = ({ userId }: Props) => {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
               <TrendingUp className="h-4 w-4 text-primary" />
             </div>
-            AI Recommended for You
+            AI Recommended for You {userId}
           </CardTitle>
         </CardHeader>
         <CardContent>

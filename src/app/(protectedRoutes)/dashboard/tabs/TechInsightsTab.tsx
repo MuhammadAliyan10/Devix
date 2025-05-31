@@ -4,10 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Globe,
   TrendingUp,
   Rss,
-  Code,
   Calendar,
   Users,
   Bookmark,
@@ -142,7 +140,7 @@ const TechInsightsTab = ({ userId }: Props) => {
                 className="p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
               >
                 <h4 className="font-medium text-foreground mb-2">
-                  {topic.name}
+                  {topic.name} {userId}
                 </h4>
                 <div className="flex items-center justify-between">
                   <Badge variant="secondary" className="text-xs text-green-600">

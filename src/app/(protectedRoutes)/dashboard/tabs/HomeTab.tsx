@@ -5,9 +5,10 @@ import { GraduationCap } from "lucide-react";
 import React from "react";
 import UserInformationSection from "../_components/UserInformationSection";
 
-type Props = {};
-
-const HomeTab = (props: Props) => {
+type Props = {
+  userId: string;
+};
+const HomeTab = ({ userId }: Props) => {
   const { user } = useSession();
 
   return (
@@ -40,7 +41,7 @@ const HomeTab = (props: Props) => {
         </div>
 
         {/* Main Content */}
-        <UserInformationSection userId={user.id} />
+        <UserInformationSection userId={userId} />
       </div>
     </div>
   );

@@ -72,12 +72,12 @@ const TabsComponent: React.FC<TabsComponentProps> = ({
 
     return cn(
       baseClasses,
-      "rounded-none border-b-2 border-b-transparent bg-transparent text-muted-foreground shadow-none hover:text-foreground data-[state=active]:border-b-indigo-500 data-[state=active]:text-indigo-500 data-[state=active]:shadow-none"
+      "rounded-none border-b-2 border-b-transparent tracking-wide bg-transparent text-muted-foreground shadow-none hover:text-foreground data-[state=active]:border-b-indigo-500 data-[state=active]:text-indigo-500 data-[state=active]:shadow-none"
     );
   };
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn("w-full ", className)}>
       <Tabs
         defaultValue={defaultValue}
         className="relative w-full"
