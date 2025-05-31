@@ -30,6 +30,7 @@ import { Github, GitPullRequestArrow, Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { signup } from "../actions";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const formSchema = z
   .object({
@@ -51,6 +52,7 @@ const formSchema = z
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -76,6 +78,7 @@ export default function RegisterPage() {
         return toast.error(res.message || "Internal server error");
       }
       toast.success("Account created successfully.");
+      router.push("/dashboard");
     } catch (error) {
       console.log(error);
       toast.error("Internal server error.");

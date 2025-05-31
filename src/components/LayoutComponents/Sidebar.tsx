@@ -93,6 +93,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
   const navItems: NavItem[] = [
     { name: "Dashboard", icon: BarChart3, section: null, path: "/dashboard" },
     {
+      name: "Learning Center",
+      icon: BookOpen,
+      section: "dropdown",
+      children: [
+        { name: "Courses", icon: BookOpen, path: "/learning/courses" },
+        { name: "Tutorials", icon: FileText, path: "/learning/tutorials" },
+        { name: "Practice Labs", icon: Code, path: "/learning/labs" },
+        { name: "Study Groups", icon: Users, path: "/learning/groups" },
+        { name: "Saved Content", icon: Heart, path: "/learning/saved" },
+      ],
+    },
+    {
       name: "Career Development",
       icon: Trophy,
       section: "dropdown",
@@ -115,18 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
         { name: "Projects", icon: FolderGit2, path: "/career/projects" }, // Added for project tracking
       ],
     },
-    {
-      name: "Learning Center",
-      icon: BookOpen,
-      section: "dropdown",
-      children: [
-        { name: "Courses", icon: BookOpen, path: "/learning/courses" },
-        { name: "Tutorials", icon: FileText, path: "/learning/tutorials" },
-        { name: "Practice Labs", icon: Code, path: "/learning/labs" },
-        { name: "Study Groups", icon: Users, path: "/learning/groups" },
-        { name: "Saved Content", icon: Heart, path: "/learning/saved" },
-      ],
-    },
+
     {
       name: "Community",
       icon: Users,

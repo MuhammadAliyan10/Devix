@@ -2,7 +2,6 @@
 
 import { cookies } from "next/headers";
 import { lucia, validateRequest } from "../actions/auth";
-import { redirect } from "next/navigation";
 import { prismaClient } from "@/lib/prismaClient";
 import { hash, verify } from "@node-rs/argon2";
 import { generateIdFromEntropySize } from "lucia";
@@ -79,8 +78,11 @@ export const signup = async (name: string, email: string, password: string) => {
     };
   } catch (error) {
     console.error("Signup error:", error);
-
-    return redirect("/dashboard");
+    return {
+      status: 500,
+      message: "An error occurred while creating account. Please try again.",
+      success: false,
+    };
   }
 };
 

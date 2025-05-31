@@ -54,7 +54,7 @@ const LabsPage = () => {
       <PageHeader
         heading="Practice Lab"
         icon={<Code className="w-10 h-10 text-primary" />}
-        subtitle={`Personalized AI-powered courses tailored to your ${user.major} studies`}
+        subtitle={`Learn to code with AI, focused on your ${user.major}`}
         showSeparator={false}
         rightComponent={
           <MainPrimaryButton

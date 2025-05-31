@@ -26,7 +26,7 @@ const SavedPage = () => {
       <PageHeader
         heading="Saved"
         icon={<BookMarked className="w-10 h-10 text-primary" />}
-        subtitle={`Your saved data.`}
+        subtitle="View your bookmarked, liked, and saved items in one place"
         showSeparator={false}
       />
       <TabsComponent tabs={tabsValue} defaultValue="bookmarked" />

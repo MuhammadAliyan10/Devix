@@ -42,7 +42,7 @@ const TutorialsPage = () => {
       <PageHeader
         heading="Tutorials"
         icon={<FileText className="w-10 h-10 text-primary" />}
-        subtitle={`Personalized AI-powered tutorials tailored to your ${user.major} studies`}
+        subtitle={`Tutorials for your ${user.major} courses, powered by AI`}
         showSeparator={false}
         rightComponent={
           <MainPrimaryButton
