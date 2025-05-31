@@ -134,7 +134,6 @@ export default function CurrentStatusStep() {
 
   return (
     <div className="space-y-4">
-      {/* Current Subjects */}
       <div className="space-y-3">
         <h3 className="text-base font-semibold text-foreground">
           Current Subjects
@@ -146,7 +145,7 @@ export default function CurrentStatusStep() {
           <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label htmlFor={`subject-name-${index}`} className="text-sm">
-                Subject Name
+                Subject Name <span className="text-destructive">*</span>
               </Label>
               <Input
                 id={`subject-name-${index}`}
@@ -159,14 +158,19 @@ export default function CurrentStatusStep() {
                 className={cn(
                   "bg-background border-border h-9 text-sm",
                   errors[`currentSubjects_${index}_name`] &&
-                    "border-destructive-error"
+                    "border-destructive focus-visible:ring-destructive"
                 )}
                 placeholder="e.g., Calculus"
               />
+              {errors[`currentSubjects_${index}_name`] && (
+                <p className="text-xs text-destructive">
+                  {errors[`currentSubjects_${index}_name`]}
+                </p>
+              )}
             </div>
             <div className="space-y-1">
               <Label htmlFor={`progress-${index}`} className="text-sm">
-                Progress (%)
+                Progress (%) <span className="text-destructive">*</span>
               </Label>
               <Input
                 id={`progress-${index}`}
@@ -180,12 +184,17 @@ export default function CurrentStatusStep() {
                 className={cn(
                   "bg-background border-border h-9 text-sm",
                   errors[`currentSubjects_${index}_progress`] &&
-                    "border-destructive-error"
+                    "border-destructive focus-visible:ring-destructive"
                 )}
                 placeholder="e.g., 75"
                 min="0"
                 max="100"
               />
+              {errors[`currentSubjects_${index}_progress`] && (
+                <p className="text-xs text-destructive">
+                  {errors[`currentSubjects_${index}_progress`]}
+                </p>
+              )}
             </div>
             <div className="space-y-1 flex items-end">
               <Button
@@ -238,7 +247,8 @@ export default function CurrentStatusStep() {
             <Button
               size="icon"
               onClick={handleAddSubject}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 w-9"
+              disabled={!newSubject.name.trim()}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 w-9 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus size={14} />
             </Button>
@@ -246,7 +256,6 @@ export default function CurrentStatusStep() {
         </div>
       </div>
 
-      {/* Extracurriculars */}
       <div className="space-y-3">
         <h3 className="text-base font-semibold text-foreground">
           Extracurricular Activities
@@ -255,7 +264,7 @@ export default function CurrentStatusStep() {
           <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="space-y-1">
               <Label htmlFor={`activity-name-${index}`} className="text-sm">
-                Activity
+                Activity <span className="text-destructive">*</span>
               </Label>
               <Input
                 id={`activity-name-${index}`}
@@ -271,14 +280,19 @@ export default function CurrentStatusStep() {
                 className={cn(
                   "bg-background border-border h-9 text-sm",
                   errors[`extracurriculars_${index}_name`] &&
-                    "border-destructive-error"
+                    "border-destructive focus-visible:ring-destructive"
                 )}
                 placeholder="e.g., Debate Club"
               />
+              {errors[`extracurriculars_${index}_name`] && (
+                <p className="text-xs text-destructive">
+                  {errors[`extracurriculars_${index}_name`]}
+                </p>
+              )}
             </div>
             <div className="space-y-1">
               <Label htmlFor={`role-${index}`} className="text-sm">
-                Role
+                Role <span className="text-destructive">*</span>
               </Label>
               <Input
                 id={`role-${index}`}
@@ -294,14 +308,19 @@ export default function CurrentStatusStep() {
                 className={cn(
                   "bg-background border-border h-9 text-sm",
                   errors[`extracurriculars_${index}_role`] &&
-                    "border-destructive-error"
+                    "border-destructive focus-visible:ring-destructive"
                 )}
                 placeholder="e.g., President"
               />
+              {errors[`extracurriculars_${index}_role`] && (
+                <p className="text-xs text-destructive">
+                  {errors[`extracurriculars_${index}_role`]}
+                </p>
+              )}
             </div>
             <div className="space-y-1">
               <Label htmlFor={`duration-${index}`} className="text-sm">
-                Duration
+                Duration <span className="text-destructive">*</span>
               </Label>
               <Input
                 id={`duration-${index}`}
@@ -317,10 +336,15 @@ export default function CurrentStatusStep() {
                 className={cn(
                   "bg-background border-border h-9 text-sm",
                   errors[`extracurriculars_${index}_duration`] &&
-                    "border-destructive-error"
+                    "border-destructive focus-visible:ring-destructive"
                 )}
                 placeholder="e.g., 2023-Present"
               />
+              {errors[`extracurriculars_${index}_duration`] && (
+                <p className="text-xs text-destructive">
+                  {errors[`extracurriculars_${index}_duration`]}
+                </p>
+              )}
             </div>
             <div className="space-y-1 flex items-end">
               <Button
@@ -390,7 +414,12 @@ export default function CurrentStatusStep() {
             <Button
               size="icon"
               onClick={handleAddExtracurricular}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 w-9"
+              disabled={
+                !newExtracurricular.name.trim() ||
+                !newExtracurricular.role.trim() ||
+                !newExtracurricular.duration.trim()
+              }
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 w-9 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus size={14} />
             </Button>
@@ -398,7 +427,6 @@ export default function CurrentStatusStep() {
         </div>
       </div>
 
-      {/* Internships */}
       <div className="space-y-3">
         <h3 className="text-base font-semibold text-foreground">Internships</h3>
         {internships.map((internship, index) => (
@@ -406,7 +434,7 @@ export default function CurrentStatusStep() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div className="space-y-1">
                 <Label htmlFor={`company-${index}`} className="text-sm">
-                  Company
+                  Company <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id={`company-${index}`}
@@ -419,14 +447,19 @@ export default function CurrentStatusStep() {
                   className={cn(
                     "bg-background border-border h-9 text-sm",
                     errors[`internships_${index}_company`] &&
-                      "border-destructive-error"
+                      "border-destructive focus-visible:ring-destructive"
                   )}
                   placeholder="e.g., Tech Corp"
                 />
+                {errors[`internships_${index}_company`] && (
+                  <p className="text-xs text-destructive">
+                    {errors[`internships_${index}_company`]}
+                  </p>
+                )}
               </div>
               <div className="space-y-1">
                 <Label htmlFor={`internship-role-${index}`} className="text-sm">
-                  Role
+                  Role <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id={`internship-role-${index}`}
@@ -439,14 +472,19 @@ export default function CurrentStatusStep() {
                   className={cn(
                     "bg-background border-border h-9 text-sm",
                     errors[`internships_${index}_role`] &&
-                      "border-destructive-error"
+                      "border-destructive focus-visible:ring-destructive"
                   )}
                   placeholder="e.g., Software Intern"
                 />
+                {errors[`internships_${index}_role`] && (
+                  <p className="text-xs text-destructive">
+                    {errors[`internships_${index}_role`]}
+                  </p>
+                )}
               </div>
               <div className="space-y-1">
                 <Label htmlFor={`startDate-${index}`} className="text-sm">
-                  Start Date
+                  Start Date <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id={`startDate-${index}`}
@@ -460,9 +498,14 @@ export default function CurrentStatusStep() {
                   className={cn(
                     "bg-background border-border h-9 text-sm",
                     errors[`internships_${index}_startDate`] &&
-                      "border-destructive-error"
+                      "border-destructive focus-visible:ring-destructive"
                   )}
                 />
+                {errors[`internships_${index}_startDate`] && (
+                  <p className="text-xs text-destructive">
+                    {errors[`internships_${index}_startDate`]}
+                  </p>
+                )}
               </div>
               <div className="space-y-1">
                 <Label htmlFor={`endDate-${index}`} className="text-sm">
@@ -512,7 +555,8 @@ export default function CurrentStatusStep() {
                 <Button
                   size="icon"
                   onClick={() => handleAddSkill(index)}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 w-9"
+                  disabled={!newSkill.trim()}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 w-9 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Plus size={14} />
                 </Button>
@@ -529,7 +573,7 @@ export default function CurrentStatusStep() {
           </div>
         ))}
         <div className="space-y-2">
-          <h4 className="text-xs font-medium text-foreground">
+          <h4 className="text-sm font-medium text-foreground">
             Add New Internship
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -601,7 +645,12 @@ export default function CurrentStatusStep() {
           </div>
           <Button
             onClick={handleAddInternship}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 text-sm"
+            disabled={
+              !newInternship.company.trim() ||
+              !newInternship.role.trim() ||
+              !newInternship.startDate
+            }
+            className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Add Internship
           </Button>

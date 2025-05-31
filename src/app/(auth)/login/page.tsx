@@ -29,6 +29,7 @@ import {
 import { Loader2, PhoneCall } from "lucide-react";
 import { login } from "../actions";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 // Form schema for validation
 const formSchema = z.object({
@@ -42,6 +43,7 @@ const formSchema = z.object({
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -58,13 +60,13 @@ export default function LoginPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-
     try {
       const res = await login(values.email, values.password);
       if (!res.success) {
         return toast.error(res.message);
       }
-      toast.success("Login successfully.");
+      toast.success(res.message);
+      router.push("/home");
     } catch (error) {
       console.log(error);
       toast.error("Internal server error.");

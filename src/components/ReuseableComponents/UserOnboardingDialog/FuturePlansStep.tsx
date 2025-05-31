@@ -143,11 +143,11 @@ const FuturePlansStep = () => {
             <Input
               value={newCareerInterest}
               onChange={(e) => setNewCareerInterest(e.target.value)}
-              className="bg-background text"
+              className="bg-background border-border h-9 text-sm"
               placeholder="Add new career interest"
             />
             <Button
-              size="sm"
+              size="icon"
               onClick={() => {
                 if (newCareerInterest.trim()) {
                   addCareerInterest(newCareerInterest);
@@ -155,6 +155,7 @@ const FuturePlansStep = () => {
                 }
               }}
               disabled={!newCareerInterest.trim()}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 w-9 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus size={14} />
             </Button>
@@ -323,7 +324,6 @@ const FuturePlansStep = () => {
             errors.targetCompletionDate &&
               "border-destructive focus-visible:ring-destructive"
           )}
-          placeholder="YYYY-MM-DD"
         />
       </div>
     </div>

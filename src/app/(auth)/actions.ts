@@ -135,7 +135,11 @@ export const login = async (email: string, password: string) => {
       sessionCookie.attributes
     );
 
-    return redirect("/home");
+    return {
+      status: 200,
+      message: "User logged in successfully.",
+      success: true,
+    };
   } catch (error) {
     if (isRedirectError(error)) throw error;
     console.error("Login error:", error);

@@ -3,15 +3,14 @@ export type ValidationErrors = {
 };
 
 export enum ActivityType {
-  READING = "READING",
+  READING = "TEXT",
   VIDEO = "VIDEO",
-  ASSIGNMENT = "ASSIGNMENT",
+  ASSIGNMENT = "INTERACTIVE",
 }
 
-export enum UserStatus {
+export enum Role {
   STUDENT = "STUDENT",
-  GRADUATE = "GRADUATE",
-  PROFESSIONAL = "PROFESSIONAL",
+  ADMIN = "ADMIN",
 }
 
 export enum UserExperience {
@@ -26,7 +25,7 @@ export enum ProgressStatus {
   COMPLETED = "COMPLETED",
 }
 
-export enum SubscriptionPlan {
+export enum SubscriptionStatus {
   FREE = "FREE",
   PREMIUM = "PREMIUM",
   ENTERPRISE = "ENTERPRISE",
@@ -42,12 +41,11 @@ export type DevixFormState = {
   basicInfo: {
     name: string;
     currentSemester: number;
-    degree: string;
     major: string;
     institution: string;
     about?: string;
     status: ProgressStatus;
-    userStatus: UserStatus;
+    role: Role;
     userExperience: UserExperience;
   };
   academicHistory: {
@@ -105,7 +103,7 @@ export type DevixFormState = {
     targetCompletionDate?: string;
   };
   subscription: {
-    plan: SubscriptionPlan;
+    plan: SubscriptionStatus;
     priceId?: string;
   };
 };
@@ -120,12 +118,8 @@ export const validateBasicInfo = (
     errors.name = "Name is required";
     valid = false;
   }
-  if (basicInfo.currentSemester <= 0) {
-    errors.currentSemester = "Current semester must be a positive number";
-    valid = false;
-  }
-  if (!basicInfo.degree) {
-    errors.degree = "Degree is required";
+  if (basicInfo.currentSemester < 0) {
+    errors.currentSemester = "Current semester cannot be negative";
     valid = false;
   }
   if (!basicInfo.major) {
@@ -307,7 +301,7 @@ export const validateSubscription = (
 
   if (
     !subscription.plan ||
-    !Object.values(SubscriptionPlan).includes(subscription.plan)
+    !Object.values(SubscriptionStatus).includes(subscription.plan)
   ) {
     errors.plan = "Valid subscription plan is required";
     valid = false;

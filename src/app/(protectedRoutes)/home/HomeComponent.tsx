@@ -1,72 +1,57 @@
-// components/HomeComponent.tsx
 "use client";
+import PageHeader from "@/components/ReuseableComponents/Main/PageHeader";
+import TabsComponent from "@/components/ReuseableComponents/ReuseableTabComponent/TabsComponent";
 import UserOnboardingDialog from "@/components/ReuseableComponents/UserOnboardingDialog";
 import { useSession } from "@/provider/SessionProvider";
-import { useDevixStore } from "@/store/useDevixStore";
-import React, { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import React from "react";
+import Home from "./_components/Home";
 
 const HomeComponent = () => {
   const { user } = useSession();
 
-  const { isCompleted, initializeStore, isSubmitting } = useDevixStore();
-  const [showBadge, setShowBadge] = useState(false);
-  // const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    // setIsLoading(true);
-    try {
-      if (user?.id) {
-        initializeStore(user.id);
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      // setIsLoading(false);
-    }
-  }, [user?.id, initializeStore]);
-
-  useEffect(() => {
-    if (!isCompleted) {
-      const timer = setTimeout(() => {
-        setShowBadge(true);
-      }, 120000);
-      return () => clearTimeout(timer);
-    }
-  }, [isCompleted]);
-
-  if (!user) {
-    return null; // Handle case where session is not loaded
+  if (!user.major || !user.institution) {
+    return (
+      <div className="w-full h-full flex flex-col justify-center items-center">
+        <div className="text-center leading-1 flex flex-col justify-center items-center">
+          <h3 className="text-4xl font-bold">Complete Your Onboarding</h3>
+          <p className="text-muted-foreground my-3 text-sm">
+            To provide personalized recommendations, track your progress, and
+            connect you <br />
+            with the most relevant resources, we need a few more details about
+            <br /> your academic background.
+          </p>
+          <UserOnboardingDialog text="User Onboarding" />
+        </div>
+      </div>
+    );
   }
 
-  return (
-    <div className="w-full h-screen">
-      <div className="flex justify-between items-center">
-        <h2>Welcome, {user.name}</h2>
-        {isSubmitting ? (
-          <span>Loading...</span>
-        ) : isCompleted ? (
-          <Badge
-            variant="default"
-            className="bg-primary text-primary-foreground"
-          >
-            Profile Updated
-          </Badge>
-        ) : (
-          <>
-            {showBadge && (
-              <Badge
-                variant="default"
-                className="bg-primary text-primary-foreground mr-2"
-              >
-                Complete Your Profile
-              </Badge>
-            )}
+  const tabsValue = [
+    {
+      name: "Home",
+      value: "home",
+      component: <Home />,
+    },
+    {
+      name: "Courses",
+      value: "courses",
+      component: "Courses",
+    },
+    {
+      name: "Quizzes",
+      value: "quizzes",
+      component: "Quizzes",
+    },
+  ];
 
-            <UserOnboardingDialog />
-          </>
-        )}
-      </div>
+  return (
+    <div>
+      <PageHeader
+        heading="Home"
+        rightComponent={<UserOnboardingDialog text="Update Onboarding" />}
+      />
+      <div className="my-4"></div>
+      <TabsComponent tabs={tabsValue} defaultValue="home" />
     </div>
   );
 };

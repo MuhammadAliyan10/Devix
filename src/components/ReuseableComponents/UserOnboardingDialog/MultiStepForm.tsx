@@ -148,7 +148,6 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
       setSubmitting(true);
       setIsLoading(true);
 
-      // Save final step (futurePlans) if not already saved
       if (!completedSteps.includes("futurePlans")) {
         const success = await saveStepData("futurePlans");
         if (!success) {
@@ -157,7 +156,6 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
         setCompletedSteps([...completedSteps, "futurePlans"]);
       }
 
-      // Queue AI training
       setIsTraining(true);
       const trainingResponse = await queueAITraining(user.id);
       if (!trainingResponse.success) {
@@ -168,10 +166,9 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
       }
 
       setCompleted(true);
-      onComplete(formData.basicInfo.userStatus);
+      onComplete(formData.basicInfo.role);
       toast.success("Profile data saved successfully! AI training initiated.");
       router.refresh();
-      setModalOpen(false);
     } catch (error) {
       console.error("Error completing onboarding:", error);
       toast.error("Failed to complete onboarding. Please try again.");
@@ -180,6 +177,7 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
       setSubmitting(false);
       setIsLoading(false);
       setIsTraining(false);
+      setModalOpen(false);
     }
   };
 
@@ -216,7 +214,7 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
                           <AnimatePresence mode="wait">
                             {isCompleted ? (
                               <motion.div
-                                key={"check"}
+                                key="check"
                                 initial={{ opacity: 0, scale: 0.5 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.5 }}
@@ -226,14 +224,14 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
                               </motion.div>
                             ) : (
                               <motion.div
-                                key={"number"}
+                                key="number"
                                 initial={{ opacity: 0, scale: 0.5 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.5 }}
                                 transition={{ duration: 0.2 }}
                                 className="text-white"
                               >
-                                <Check className="w-5 h-5 text-white/50" />
+                                {index + 1}
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -241,13 +239,13 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
                         {index < steps.length - 1 && (
                           <div className="absolute top-8 left-4 w-0.5 h-16 bg-gray-700 overflow-hidden">
                             <motion.div
-                              initial={{
+                              animate={{
                                 height: isPast || isCompleted ? "100%" : "0%",
                                 backgroundColor: "rgb(147,51,234)",
                               }}
                               transition={{ duration: 0.5, ease: "easeInOut" }}
                               className="w-full h-full"
-                            ></motion.div>
+                            />
                           </div>
                         )}
                       </div>
@@ -256,8 +254,8 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
                           animate={{
                             color:
                               isCurrent || isCompleted
-                                ? "text-primary"
-                                : "text-secondary",
+                                ? "rgb(147,51,234)"
+                                : "rgb(156,163,175)",
                           }}
                           transition={{ duration: 0.3 }}
                           className="font-medium"
@@ -286,7 +284,7 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
                 className="p-6"
               >
                 <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-primary">
+                  <h2 className="text-xl font-semibold text-foreground">
                     {currentStep.title}
                   </h2>
                   <p className="text-muted-foreground">
@@ -322,10 +320,6 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
             variant="outline"
             onClick={handleBack}
             disabled={isSubmitting || isLoading || isTraining}
-            className={cn(
-              "border-border text-primary hover:bg-muted",
-              isFirstStep && "opacity-50 cursor-not-allowed"
-            )}
           >
             {isFirstStep ? "Cancel" : "Back"}
           </Button>
@@ -358,8 +352,7 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
             <DialogTitle>Confirm Your Information</DialogTitle>
             <DialogDescription>
               Are you sure this information is correct? Our AI model will
-              generate personalized learning paths based on this data. Please
-              note that you can only modify this data in the premium version.
+              generate personalized learning paths based on this data.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

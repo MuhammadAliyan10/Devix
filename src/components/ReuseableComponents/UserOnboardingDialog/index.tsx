@@ -1,13 +1,14 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import React from "react";
+import React, { useEffect } from "react";
 import MultiStepForm from "./MultiStepForm";
 import BasicInfoStep from "./BasicInfoStep";
 import AcademicBackground from "./AcademicBackground";
 import CurrentStatusStep from "./CurrentStatusStep";
 import FuturePlansStep from "./FuturePlansStep";
 import { useDevixStore } from "@/store/useDevixStore";
+import { GraduationCap } from "lucide-react";
+import { useSession } from "@/provider/SessionProvider";
 
 const steps = [
   {
@@ -36,9 +37,29 @@ const steps = [
   },
 ];
 
-export default function UserOnboardingDialog() {
-  const { isModalOpen, setModalOpen, isCompleted, setCompleted } =
-    useDevixStore();
+type props = {
+  text: string;
+};
+
+export default function UserOnboardingDialog({ text }: props) {
+  const {
+    isModalOpen,
+    setModalOpen,
+    isCompleted,
+    setCompleted,
+    initializeStore,
+  } = useDevixStore();
+  const { user } = useSession();
+  useEffect(() => {
+    try {
+      if (user?.id) {
+        initializeStore(user.id);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+    }
+  }, [user?.id, initializeStore]);
 
   const handleCompletion = () => {
     setCompleted(true);
@@ -47,9 +68,10 @@ export default function UserOnboardingDialog() {
   return (
     <Dialog open={isModalOpen} onOpenChange={setModalOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          Start Onboarding
-        </Button>
+        <button className="rounded-xl flex gap-2 items-center hover:cursor-pointer px-4 py-2 border border-border bg-primary/10 backdrop-blur-sm text-sm font-normal text-primary hover:bg-primary-20">
+          <GraduationCap className="w-4 h-4" />
+          {text}
+        </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[1300px] p-0 bg-transparent border-none">
         {isCompleted ? (

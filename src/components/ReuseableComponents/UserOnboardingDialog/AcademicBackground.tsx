@@ -225,7 +225,7 @@ export default function AcademicBackground() {
                     id={`semester-${semesterIndex}`}
                     type="number"
                     min="1"
-                    max="10"
+                    max={currentSemester - 1}
                     value={semester.semester || ""}
                     onChange={(e) =>
                       handleSemesterFieldChange(
@@ -477,7 +477,7 @@ export default function AcademicBackground() {
                   id="new-semester"
                   type="number"
                   min="1"
-                  max="10"
+                  max={currentSemester - 1}
                   value={newSemester.semester || ""}
                   onChange={(e) =>
                     setNewSemester({

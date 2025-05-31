@@ -1,7 +1,7 @@
 import React from "react";
 
 import { cn } from "@/lib/utils";
-import { UserStatus, UserExperience, ProgressStatus } from "@/lib/types";
+import { Role, UserExperience, ProgressStatus } from "@/lib/types";
 import { useDevixStore } from "@/store/useDevixStore";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -21,12 +21,11 @@ export default function BasicInfoStep() {
   const {
     name,
     currentSemester,
-    degree,
     major,
     institution,
     about,
     status,
-    userStatus,
+    role,
     userExperience,
   } = formData.basicInfo;
 
@@ -90,50 +89,27 @@ export default function BasicInfoStep() {
 
         <div className="space-y-2">
           <Label
-            htmlFor="degree"
-            className={cn(errors.degree && "text-destructive")}
+            htmlFor="major"
+            className={cn(errors.major && "text-destructive")}
           >
-            Degree <span className="text-destructive">*</span>
+            Major <span className="text-destructive">*</span>
           </Label>
-          {errors.degree && (
-            <p className="text-sm text-destructive">{errors.degree}</p>
+          {errors.major && (
+            <p className="text-sm text-destructive">{errors.major}</p>
           )}
           <Input
-            id="degree"
-            name="degree"
-            value={degree || ""}
+            id="major"
+            name="major"
+            value={major || ""}
             onChange={handleChange}
-            placeholder="Enter your degree"
+            placeholder="Enter your major"
             className={cn(
               "bg-background border-border",
-              errors.degree &&
+              errors.major &&
                 "border-destructive focus-visible:ring-destructive"
             )}
           />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label
-          htmlFor="major"
-          className={cn(errors.major && "text-destructive")}
-        >
-          Major <span className="text-destructive">*</span>
-        </Label>
-        {errors.major && (
-          <p className="text-sm text-destructive">{errors.major}</p>
-        )}
-        <Input
-          id="major"
-          name="major"
-          value={major || ""}
-          onChange={handleChange}
-          placeholder="Enter your major"
-          className={cn(
-            "bg-background border-border",
-            errors.major && "border-destructive focus-visible:ring-destructive"
-          )}
-        />
       </div>
 
       <div className="space-y-2">
@@ -192,27 +168,27 @@ export default function BasicInfoStep() {
 
         <div className="space-y-2">
           <Label
-            htmlFor="userStatus"
-            className={cn(errors.userStatus && "text-destructive")}
+            htmlFor="role"
+            className={cn(errors.role && "text-destructive")}
           >
-            User Status <span className="text-destructive">*</span>
+            Role <span className="text-destructive">*</span>
           </Label>
-          {errors.userStatus && (
-            <p className="text-sm text-destructive">{errors.userStatus}</p>
+          {errors.role && (
+            <p className="text-sm text-destructive">{errors.role}</p>
           )}
           <Select
-            value={userStatus || UserStatus.STUDENT}
+            value={role || Role.STUDENT}
             onValueChange={(value) =>
-              updateBasicInfoField("userStatus", value as UserStatus)
+              updateBasicInfoField("role", value as Role)
             }
           >
             <SelectTrigger className="bg-background border-border">
-              <SelectValue placeholder="Select status" />
+              <SelectValue placeholder="Select role" />
             </SelectTrigger>
             <SelectContent className="bg-background border-border">
-              {Object.values(UserStatus).map((status) => (
-                <SelectItem key={status} value={status}>
-                  {status}
+              {Object.values(Role).map((role) => (
+                <SelectItem key={role} value={role}>
+                  {role}
                 </SelectItem>
               ))}
             </SelectContent>

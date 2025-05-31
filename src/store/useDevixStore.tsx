@@ -1,4 +1,3 @@
-// store/useDevixStore.ts
 import { create } from "zustand";
 import {
   validateBasicInfo,
@@ -9,9 +8,9 @@ import {
   ValidationErrors,
   DevixFormState,
   ProgressStatus,
-  UserStatus,
+  Role,
   UserExperience,
-  SubscriptionPlan,
+  SubscriptionStatus,
   LearningStyle,
 } from "@/lib/types";
 import { fetchUserData } from "@/actions/data";
@@ -20,12 +19,11 @@ const initialState: DevixFormState = {
   basicInfo: {
     name: "",
     currentSemester: 0,
-    degree: "",
     major: "",
     institution: "",
     about: "",
     status: ProgressStatus.NOT_STARTED,
-    userStatus: UserStatus.STUDENT,
+    role: Role.STUDENT,
     userExperience: UserExperience.FRESHER,
   },
   academicHistory: {
@@ -50,7 +48,7 @@ const initialState: DevixFormState = {
     targetCompletionDate: "",
   },
   subscription: {
-    plan: SubscriptionPlan.FREE,
+    plan: SubscriptionStatus.FREE,
     priceId: "",
   },
 };

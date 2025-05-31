@@ -1,11 +1,15 @@
 "use client";
 
+import { SubscriptionStatus } from "@prisma/client";
 import React, { createContext, useContext } from "react";
 
 interface User {
   id: string;
   name: string;
   email?: string;
+  major: string;
+  institution: string;
+  subscriptionStatus: SubscriptionStatus;
   profileImageUrl: string | null;
   createdAt?: Date;
 }
