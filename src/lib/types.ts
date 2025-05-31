@@ -309,3 +309,40 @@ export const validateSubscription = (
 
   return { valid, errors };
 };
+
+export interface UserData {
+  basicInfo: {
+    name: string;
+    currentSemester: number;
+    major: string;
+    institution: string;
+    about: string;
+    status: string;
+    role: string;
+    userExperience: string;
+  };
+  academicHistory: {
+    previousSemesters: string[];
+    priorEducation: string[];
+    skills: string[];
+    certifications: string[];
+  };
+  currentStatus: {
+    currentSubjects: {
+      id: string;
+      name: string;
+      progress: number;
+      quizIds: string[];
+    }[];
+    extracurriculars: string[];
+    internships: string[];
+  };
+  futurePlans: {
+    careerGoals: string[];
+    careerInterests: string[];
+    preferredLearningStyle: string;
+    timeAvailability: { hoursPerWeek: number; preferredDays: string[] };
+    targetCompletionDate?: Date;
+  };
+  subscription: { plan: string; priceId: string };
+}

@@ -1,3 +1,4 @@
+"use client";
 import { logout } from "@/app/(auth)/actions";
 import { motion } from "framer-motion";
 import {
@@ -32,7 +33,7 @@ import {
   Star,
   GraduationCap,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -43,7 +44,9 @@ interface NavItem {
   children?: {
     name: string;
     icon: React.ComponentType<{ size?: number; className?: string }>;
+    path?: string;
   }[];
+  path?: string;
 }
 
 interface SidebarProps {
@@ -52,14 +55,14 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
-  const [activePage, setActivePage] = useState<string>("Home");
   const [expandedSections, setExpandedSections] = useState<{
     [key: string]: boolean;
   }>({});
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // Check for mobile screen size
   useEffect(() => {
     const checkScreenSize = () => {
       const mobile = window.innerWidth < 768;
@@ -90,20 +93,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
   };
 
   const navItems: NavItem[] = [
-    { name: "Home", icon: Home, section: null },
-    { name: "Dashboard", icon: BarChart3, section: null },
+    { name: "Dashboard", icon: BarChart3, section: null, path: "/dashboard" },
     {
       name: "Career Development",
       icon: Trophy,
       section: "dropdown",
       children: [
-        { name: "Progress Tracking", icon: TrendingUp },
-        { name: "Skill Assessment", icon: Brain },
-        { name: "Learning Resources", icon: BookOpen },
-        { name: "Career Goals", icon: Target },
-        { name: "Quizzes & Tests", icon: NotepadText },
-        { name: "Achievements", icon: Star },
-        { name: "Career Path", icon: Zap },
+        {
+          name: "Progress Tracking",
+          icon: TrendingUp,
+          path: "/career/progress",
+        },
+        { name: "Skill Assessment", icon: Brain, path: "/career/assessment" },
+        {
+          name: "Learning Resources",
+          icon: BookOpen,
+          path: "/career/resources",
+        },
+        { name: "Career Goals", icon: Target, path: "/career/goals" },
+        { name: "Quizzes & Tests", icon: NotepadText, path: "/career/quizzes" },
+        { name: "Achievements", icon: Star, path: "/career/achievements" },
+        { name: "Career Path", icon: Zap, path: "/career/path" },
       ],
     },
     {
@@ -111,13 +121,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
       icon: Code,
       section: "dropdown",
       children: [
-        { name: "Tech News", icon: Rss },
-        { name: "Developer Blogs", icon: FileText },
-        { name: "Community Forums", icon: Users },
-        { name: "Code Snippets", icon: Code },
-        { name: "Tech Events", icon: Calendar },
-        { name: "Industry Trends", icon: Globe },
-        { name: "Bookmarks", icon: Bookmark },
+        { name: "Tech News", icon: Rss, path: "/tech/news" },
+        { name: "Developer Blogs", icon: FileText, path: "/tech/blogs" },
+        { name: "Community Forums", icon: Users, path: "/tech/forums" },
+        { name: "Code Snippets", icon: Code, path: "/tech/snippets" },
+        { name: "Tech Events", icon: Calendar, path: "/tech/events" },
+        { name: "Industry Trends", icon: Globe, path: "/tech/trends" },
+        { name: "Bookmarks", icon: Bookmark, path: "/tech/bookmarks" },
       ],
     },
     {
@@ -125,12 +135,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
       icon: BookOpen,
       section: "dropdown",
       children: [
-        { name: "Courses", icon: BookOpen },
-        { name: "Tutorials", icon: FileText },
-        { name: "Practice Labs", icon: Code },
-        { name: "Study Groups", icon: Users },
-        { name: "Certifications", icon: Trophy },
-        { name: "Saved Content", icon: Heart },
+        { name: "Courses", icon: BookOpen, path: "/learning/courses" },
+        { name: "Tutorials", icon: FileText, path: "/learning/tutorials" },
+        { name: "Practice Labs", icon: Code, path: "/learning/labs" },
+        { name: "Study Groups", icon: Users, path: "/learning/groups" },
+        {
+          name: "Certifications",
+          icon: Trophy,
+          path: "/learning/certifications",
+        },
+        { name: "Saved Content", icon: Heart, path: "/learning/saved" },
       ],
     },
     {
@@ -138,25 +152,35 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
       icon: Users,
       section: "dropdown",
       children: [
-        { name: "My Profile", icon: User },
-        { name: "Connections", icon: Users },
-        { name: "Messages", icon: MessageCircle },
-        { name: "Group Discussions", icon: MessageCircle },
-        { name: "Mentorship", icon: User },
-        { name: "Job Board", icon: Search },
+        { name: "My Profile", icon: User, path: "/social/profile" },
+        { name: "Connections", icon: Users, path: "/social/connections" },
+        { name: "Messages", icon: MessageCircle, path: "/social/messages" },
+        {
+          name: "Group Discussions",
+          icon: MessageCircle,
+          path: "/social/discussions",
+        },
+        { name: "Mentorship", icon: User, path: "/social/mentorship" },
+        { name: "Job Board", icon: Search, path: "/social/jobs" },
       ],
     },
-    { name: "Calendar", icon: Calendar, section: null },
-    { name: "Help & Support", icon: HelpCircle, section: null },
+    { name: "Calendar", icon: Calendar, section: null, path: "/calendar" },
+    { name: "Help & Support", icon: HelpCircle, section: null, path: "/help" },
   ];
 
-  const handleItemClick = (itemName: string, isChild: boolean = false) => {
-    setActivePage(itemName);
+  const handleItemClick = (
+    itemName: string,
+    path?: string,
+    isChild: boolean = false
+  ) => {
+    if (path) {
+      router.push(path);
+    }
     if (isMobile && !isChild) {
       setIsMobileMenuOpen(false);
     }
   };
-  const router = useRouter();
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -169,7 +193,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
   };
 
   const renderNavItem = (item: NavItem, isChild: boolean = false) => {
-    const isActive = activePage === item.name;
+    const isActive = pathname === item.path;
     const hasChildren = item.children && item.children.length > 0;
     const isSectionExpanded = expandedSections[item.name];
 
@@ -180,7 +204,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
             if (hasChildren && (isExpanded || isMobile)) {
               toggleSection(item.name);
             } else {
-              handleItemClick(item.name, isChild);
+              handleItemClick(item.name, item.path, isChild);
             }
           }}
           className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-all duration-200 group relative ${
@@ -224,7 +248,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-background">
-      {/* Header */}
       <div
         className={`flex items-center px-4 py-4 border-b border-border ${
           !isExpanded && !isMobile && "justify-center px-2"
@@ -270,14 +293,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
         )}
       </div>
 
-      {/* Navigation */}
       <div className="flex-1 overflow-y-auto py-2">
         <nav className="space-y-1">
           {navItems.map((item) => renderNavItem(item))}
         </nav>
       </div>
 
-      {/* Footer */}
       <div className="border-t border-border p-3">
         <button
           className={`w-full flex items-center gap-3 px-3 py-2 text-left text-sm font-medium  light:text-gray-700 hover:text-red-600 transition-all duration-200 group ${
@@ -300,7 +321,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
 
   return (
     <>
-      {/* Mobile menu button */}
       {isMobile && (
         <button
           onClick={handleToggleSidebar}
@@ -311,7 +331,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
         </button>
       )}
 
-      {/* Mobile overlay */}
       {isMobile && isMobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black/30 z-40 md:hidden"
@@ -319,7 +338,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
         />
       )}
 
-      {/* Sidebar */}
       <div
         className={`
           ${
@@ -334,7 +352,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, toggleSidebar }) => {
           bg-background border-r border-border shadow-sm
         `}
       >
-        {/* Desktop toggle button */}
         {!isMobile && (
           <button
             onClick={toggleSidebar}

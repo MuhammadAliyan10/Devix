@@ -22,7 +22,7 @@ import {
   saveCurrentStatus,
   saveFuturePlans,
   queueAITraining,
-} from "@/actions/data";
+} from "@/app/actions/data";
 import { useSession } from "@/provider/SessionProvider";
 
 type Step = {

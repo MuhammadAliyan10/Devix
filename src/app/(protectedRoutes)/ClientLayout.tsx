@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Navbar from "./_components/Navbar";
-import Sidebar from "./_components/Sidebar";
+import Navbar from "../../components/LayoutComponents/Navbar";
+import Sidebar from "../../components/LayoutComponents/Sidebar";
 import SessionProvider from "@/provider/SessionProvider";
 
 interface User {

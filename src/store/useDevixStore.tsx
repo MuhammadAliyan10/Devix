@@ -13,7 +13,7 @@ import {
   SubscriptionStatus,
   LearningStyle,
 } from "@/lib/types";
-import { fetchUserData } from "@/actions/data";
+import { fetchUserData } from "@/app/actions/data";
 
 const initialState: DevixFormState = {
   basicInfo: {

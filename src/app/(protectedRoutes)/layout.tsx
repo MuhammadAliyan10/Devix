@@ -1,4 +1,4 @@
-import { validateRequest } from "@/actions/auth";
+import { validateRequest } from "@/app/actions/auth";
 import { redirect } from "next/navigation";
 import ClientLayout from "./ClientLayout";
 

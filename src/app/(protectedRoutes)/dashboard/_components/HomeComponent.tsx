@@ -4,7 +4,11 @@ import TabsComponent from "@/components/ReuseableComponents/ReuseableTabComponen
 import UserOnboardingDialog from "@/components/ReuseableComponents/UserOnboardingDialog";
 import { useSession } from "@/provider/SessionProvider";
 import React from "react";
-import Home from "./_components/Home";
+import Home from "../tabs/HomeTab";
+import LearningTab from "../tabs/LearningTab";
+import CareerTab from "../tabs/CareerTab";
+import TechInsightsTab from "../tabs/TechInsightsTab";
+import { BarChart, ChartBar } from "lucide-react";
 
 const HomeComponent = () => {
   const { user } = useSession();
@@ -28,30 +32,38 @@ const HomeComponent = () => {
 
   const tabsValue = [
     {
-      name: "Home",
-      value: "home",
+      name: "Overview",
+      value: "overview",
       component: <Home />,
     },
     {
-      name: "Courses",
-      value: "courses",
-      component: "Courses",
+      name: "Learning",
+      value: "learning",
+      component: <LearningTab userId={user.id} />,
     },
     {
-      name: "Quizzes",
-      value: "quizzes",
-      component: "Quizzes",
+      name: "Career",
+      value: "career",
+      component: <CareerTab userId={user.id} />,
+    },
+    {
+      name: "Tech Insights",
+      value: "tech-insights",
+      component: <TechInsightsTab userId={user.id} />,
     },
   ];
 
   return (
     <div>
       <PageHeader
-        heading="Home"
-        rightComponent={<UserOnboardingDialog text="Update Onboarding" />}
+        heading="Dashboard"
+        icon={<ChartBar className="w-10 h-10 text-primary" />}
+        subtitle="AI-powered insights and recommendations tailored for your career growth"
+        showSeparator={false}
+        rightComponent={<UserOnboardingDialog text="Update Profile" />}
       />
       <div className="my-4"></div>
-      <TabsComponent tabs={tabsValue} defaultValue="home" />
+      <TabsComponent tabs={tabsValue} defaultValue="overview" />
     </div>
   );
 };
