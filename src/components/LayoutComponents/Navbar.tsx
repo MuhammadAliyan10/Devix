@@ -7,13 +7,13 @@ import {
   Settings,
   Sun,
   Moon,
-  Menu,
   X,
   ChevronDown,
   LogOut,
   UserCircle,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -23,16 +23,16 @@ interface NavbarProps {
   isSidebarExpanded: boolean;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
+const Navbar: React.FC<NavbarProps> = () => {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-  const { user } = useSession();
-
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState<boolean>(false);
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] =
     useState<boolean>(false);
+  const { user } = useSession();
   const { setTheme, theme } = useTheme();
+  const router = useRouter();
 
   // Check for mobile screen size
   useEffect(() => {
@@ -43,6 +43,23 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
     checkScreenSize();
     window.addEventListener("resize", checkScreenSize);
     return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (
+        !target.closest(".profile-menu") &&
+        !target.closest(".notification-menu")
+      ) {
+        setIsProfileMenuOpen(false);
+        setIsNotificationMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
   const toggleTheme = () => {
@@ -64,31 +81,14 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
     setIsProfileMenuOpen(false);
   };
 
-  // Close menus when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (
-        !target.closest(".profile-menu") &&
-        !target.closest(".notification-menu")
-      ) {
-        setIsProfileMenuOpen(false);
-        setIsNotificationMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
-  const router = useRouter();
   const handleLogout = async () => {
     try {
       await logout();
-      toast.success("Logout successfully");
+      toast.success("Logout successful");
       router.push("/login");
     } catch (error) {
       console.error("Logout error:", error);
-      toast.error("Error while logout. Try again later.");
+      toast.error("Error during logout. Please try again.");
     }
   };
 
@@ -124,32 +124,28 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
       <div className="flex items-center justify-between h-16 px-4 md:px-6">
         {/* Left Section */}
         <div className="flex items-center gap-4">
-          {isMobile && (
-            <button
-              onClick={onMenuToggle}
-              className="flex items-center justify-center w-8 h-8 text-gray-600 hover:text-primary hover:bg-background rounded-md transition-colors"
-            >
-              <Menu size={20} />
-            </button>
-          )}
-
-          {/* Search Bar - Stripe style */}
           {!isMobile && (
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search size={16} className="text-gray-400" />
+            <>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search size={16} className="text-gray-400" />
+                </div>
+                <Input
+                  type="text"
+                  placeholder="Search..."
+                  className="w-[40rem] pl-10 pr-4 py-2 text-sm light:bg-gray-50 bg-secondary border border-border light:border-gray-200 rounded-md focus:outline-none focus:ring-2 light:focus:ring-indigo-500 focus:border-transparent placeholder-gray-500"
+                />
               </div>
-              <Input
-                type="text"
-                placeholder="Search..."
-                className="w-[40rem] pl-10 pr-4 py-2 text-sm light:bg-gray-50 bg-secondary border border-border light:border-gray-200 rounded-md focus:outline-none focus:ring-2 light:focus:ring-indigo-500 focus:border-transparent placeholder-gray-500"
-              />
-            </div>
+            </>
           )}
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-3">
+        <div
+          className={`flex items-center gap-3 ${
+            isMobile ? "justify-center w-full" : ""
+          }`}
+        >
           {/* Mobile Search */}
           {isMobile && (
             <button
@@ -226,95 +222,100 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
                   ))}
                 </div>
                 <div className="p-3 border-t border-border">
-                  <button className="w-full text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-                    View all notifications
-                  </button>
+                  <Link href="/notifications">
+                    <button className="w-full text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                      View all notifications
+                    </button>
+                  </Link>
                 </div>
               </div>
             )}
           </div>
 
           {/* Settings */}
-          <button className="flex items-center justify-center w-8 h-8 text-primary hover:bg-secondary light:text-gray-600 light:hover:text-gray-900 light:hover:bg-gray-100  rounded-md transition-colors">
-            <Settings size={18} />
-          </button>
-
-          {/* Profile Menu */}
-          <div className="relative profile-menu">
-            <button
-              onClick={toggleProfileMenu}
-              className="flex items-center gap-2 p-1 light:hover:bg-gray-100 rounded-md cursor-pointer transition-colors"
-              aria-label="Profile menu"
-            >
-              <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
-                  {user.profileImageUrl
-                    ? user.profileImageUrl
-                    : user.name.slice(0, 1)}
-                </span>
-              </div>
-              <ChevronDown size={14} className="text-gray-500" />
+          <Link href="/settings">
+            <button className="flex items-center justify-center w-8 h-8 text-primary hover:bg-secondary light:text-gray-600 light:hover:text-gray-900 light:hover:bg-gray-100 rounded-md transition-colors">
+              <Settings size={18} />
             </button>
+          </Link>
 
-            {/* Profile Dropdown */}
-            {isProfileMenuOpen && (
-              <div className="absolute right-0 top-10 w-64 bg-card border border-border rounded-lg shadow-lg z-50">
-                <div className="p-4 border-b border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-card rounded-full border-border border flex items-center justify-center">
-                      <span className="text-primary font-medium">
-                        {user.profileImageUrl
-                          ? user.profileImageUrl
-                          : user.name.slice(0, 1)}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-primary">
-                        {user?.name ? user.name : "unknown"}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {user?.email}
-                      </p>
+          {/* Profile Menu (Hidden on Mobile) */}
+          {!isMobile && (
+            <div className="relative profile-menu">
+              <button
+                onClick={toggleProfileMenu}
+                className="flex items-center gap-2 p-1 light:hover:bg-gray-100 rounded-md cursor-pointer transition-colors"
+                aria-label="Profile menu"
+              >
+                <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">
+                    {user?.name?.slice(0, 1) || "U"}
+                  </span>
+                </div>
+                <ChevronDown size={14} className="text-gray-500" />
+              </button>
+
+              {/* Profile Dropdown */}
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 top-10 w-64 bg-card border border-border rounded-lg shadow-lg z-50">
+                  <div className="p-4 border-b border-border">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-card rounded-full border-border border flex items-center justify-center">
+                        <span className="text-primary font-medium">
+                          {user?.name?.slice(0, 1) || "U"}
+                        </span>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-primary">
+                          {user?.name || "Unknown"}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {user?.email || "No email"}
+                        </p>
+                      </div>
                     </div>
                   </div>
+                  <div className="py-2">
+                    <Link href="/community/profile">
+                      <button className="flex items-center gap-3 px-4 py-2 text-sm text-primary hover:bg-secondary light:hover:bg-gray-50 w-full text-left">
+                        <UserCircle size={16} />
+                        Profile
+                      </button>
+                    </Link>
+                    <Link href="/settings">
+                      <button className="flex items-center gap-3 px-4 py-2 text-primary hover:bg-secondary light:hover:bg-gray-50 w-full text-left">
+                        <Settings size={16} />
+                        Account Settings
+                      </button>
+                    </Link>
+                    <hr className="my-2 border-border" />
+                    <button
+                      className="flex items-center gap-3 px-4 py-2 text-primary hover:bg-secondary light:hover:bg-gray-50 w-full text-left"
+                      onClick={handleLogout}
+                    >
+                      <LogOut size={16} />
+                      Sign Out
+                    </button>
+                  </div>
                 </div>
-                <div className="py-2">
-                  <button className="flex items-center gap-3 px-4 py-2 text-sm text-primary hover:bg-secondary light:hover:bg-gray-50 w-full text-left">
-                    <UserCircle size={16} />
-                    Profile
-                  </button>
-                  <button className="flex items-center gap-3 px-4 py-2 text-primary hover:bg-secondary light:hover:bg-gray-50 w-full text-left">
-                    <Settings size={16} />
-                    Account Settings
-                  </button>
-
-                  <hr className="my-2 border-border" />
-                  <button
-                    className="flex items-center gap-3 px-4 py-2 text-primary hover:bg-secondary light:hover:bg-gray-50 w-full text-left"
-                    onClick={handleLogout}
-                  >
-                    <LogOut size={16} />
-                    Sign Out
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Mobile Search Bar */}
       {isMobile && isSearchOpen && (
-        <div className="border-t border-gray-200 p-4 bg-white">
+        <div className="border-t border-birder p-4 bg-card">
           <div className="flex gap-2">
             <div className="relative flex-1">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search size={16} className="text-gray-400" />
+                <Search size={16} className="text-primary" />
               </div>
-              <input
+              <Input
                 type="text"
                 placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-500"
+                className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-500"
                 autoFocus
               />
             </div>
