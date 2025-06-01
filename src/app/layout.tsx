@@ -12,9 +12,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: {
     template: "%s | Devix  ",
-    default: "Devix",
+    default: "Devix | Transform Your Career Journey",
   },
-  description: "Automate life, the smart way.",
+  description: "Transform Your Career Journey",
 };
 
 export default function RootLayout({
