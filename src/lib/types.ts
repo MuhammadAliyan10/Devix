@@ -50,14 +50,9 @@ export type DevixFormState = {
   };
   academicHistory: {
     previousSemesters: {
-      semester: number;
-      year: number;
-      subjects: {
-        name: string;
-        grade?: string;
-        status: ProgressStatus;
-      }[];
+      semesterName: string;
       gpa?: number;
+      creditsEarned?: number;
     }[];
     priorEducation: {
       level: string;
@@ -65,7 +60,10 @@ export type DevixFormState = {
       yearCompleted: number;
       grades?: string;
     }[];
-    skills: string[];
+    skills: {
+      skillName: string;
+      proficiency?: string;
+    }[];
     certifications: {
       name: string;
       issuer: string;
@@ -77,7 +75,6 @@ export type DevixFormState = {
     currentSubjects: {
       name: string;
       progress: number;
-      quizIds: string[];
     }[];
     extracurriculars: {
       name: string;
@@ -94,7 +91,10 @@ export type DevixFormState = {
   };
   futurePlans: {
     careerGoals: string[];
-    careerInterests: string[];
+    careerInterests: {
+      name: string;
+      subscriptionTier: SubscriptionStatus;
+    }[];
     preferredLearningStyle: LearningStyle;
     timeAvailability: {
       hoursPerWeek: number;
@@ -107,6 +107,75 @@ export type DevixFormState = {
     priceId?: string;
   };
 };
+
+export interface UserData {
+  basicInfo: {
+    name: string;
+    currentSemester: number;
+    major: string;
+    institution: string;
+    about: string;
+    status: string;
+    role: string;
+    userExperience: string;
+  };
+  academicHistory: {
+    previousSemesters: {
+      semesterName: string;
+      gpa?: number;
+      creditsEarned?: number;
+    }[];
+    priorEducation: {
+      level: string;
+      institution: string;
+      yearCompleted: number;
+      grades?: string;
+    }[];
+    skills: {
+      skillName: string;
+      proficiency?: string;
+    }[];
+    certifications: {
+      name: string;
+      issuer: string;
+      year: number;
+      certificateId?: string;
+    }[];
+  };
+  currentStatus: {
+    currentSubjects: {
+      id: string;
+      name: string;
+      progress: number;
+    }[];
+    extracurriculars: {
+      name: string;
+      role: string;
+      duration: string;
+    }[];
+    internships: {
+      company: string;
+      role: string;
+      startDate: string;
+      endDate?: string;
+      skillsGained: string[];
+    }[];
+  };
+  futurePlans: {
+    careerGoals: string[];
+    careerInterests: {
+      name: string;
+      subscriptionTier: string;
+    }[];
+    preferredLearningStyle: string;
+    timeAvailability: { hoursPerWeek: number; preferredDays: string[] };
+    targetCompletionDate?: string;
+  };
+  subscription: {
+    plan: string;
+    priceId?: string;
+  };
+}
 
 export const validateBasicInfo = (
   basicInfo: DevixFormState["basicInfo"]
@@ -148,26 +217,21 @@ export const validateAcademicHistory = (
   }
 
   academicHistory.previousSemesters.forEach((sem, index) => {
-    if (!sem.year || sem.year < 2000 || sem.year > new Date().getFullYear()) {
-      errors[
-        `previousSemesters_${index}_year`
-      ] = `Valid year for semester ${sem.semester} is required`;
+    if (!sem.semesterName) {
+      errors[`previousSemesters_${index}_semesterName`] =
+        "Semester name is required";
       valid = false;
     }
-    if (!sem.semester || sem.semester <= 0 || sem.semester >= currentSemester) {
-      errors[
-        `previousSemesters_${index}_semester`
-      ] = `Semester number must be between 1 and ${currentSemester - 1}`;
+    if (sem.gpa && (sem.gpa < 0 || sem.gpa > 4.0)) {
+      errors[`previousSemesters_${index}_gpa`] =
+        "GPA must be between 0 and 4.0";
       valid = false;
     }
-    sem.subjects.forEach((subject, subIndex) => {
-      if (!subject.name) {
-        errors[
-          `previousSemesters_${index}_subjects_${subIndex}_name`
-        ] = `Subject name for semester ${sem.semester} is required`;
-        valid = false;
-      }
-    });
+    if (sem.creditsEarned && sem.creditsEarned < 0) {
+      errors[`previousSemesters_${index}_creditsEarned`] =
+        "Credits earned cannot be negative";
+      valid = false;
+    }
   });
 
   academicHistory.priorEducation.forEach((edu, index) => {
@@ -187,6 +251,32 @@ export const validateAcademicHistory = (
     ) {
       errors[`priorEducation_${index}_yearCompleted`] =
         "Valid completion year is required";
+      valid = false;
+    }
+  });
+
+  academicHistory.skills.forEach((skill, index) => {
+    if (!skill.skillName) {
+      errors[`skills_${index}_skillName`] = "Skill name is required";
+      valid = false;
+    }
+  });
+
+  academicHistory.certifications.forEach((cert, index) => {
+    if (!cert.name) {
+      errors[`certifications_${index}_name`] = "Certification name is required";
+      valid = false;
+    }
+    if (!cert.issuer) {
+      errors[`certifications_${index}_issuer`] = "Issuer is required";
+      valid = false;
+    }
+    if (
+      !cert.year ||
+      cert.year < 1900 ||
+      cert.year > new Date().getFullYear()
+    ) {
+      errors[`certifications_${index}_year`] = "Valid year is required";
       valid = false;
     }
   });
@@ -309,40 +399,3 @@ export const validateSubscription = (
 
   return { valid, errors };
 };
-
-export interface UserData {
-  basicInfo: {
-    name: string;
-    currentSemester: number;
-    major: string;
-    institution: string;
-    about: string;
-    status: string;
-    role: string;
-    userExperience: string;
-  };
-  academicHistory: {
-    previousSemesters: string[];
-    priorEducation: string[];
-    skills: string[];
-    certifications: string[];
-  };
-  currentStatus: {
-    currentSubjects: {
-      id: string;
-      name: string;
-      progress: number;
-      quizIds: string[];
-    }[];
-    extracurriculars: string[];
-    internships: string[];
-  };
-  futurePlans: {
-    careerGoals: string[];
-    careerInterests: string[];
-    preferredLearningStyle: string;
-    timeAvailability: { hoursPerWeek: number; preferredDays: string[] };
-    targetCompletionDate?: Date;
-  };
-  subscription: { plan: string; priceId: string };
-}

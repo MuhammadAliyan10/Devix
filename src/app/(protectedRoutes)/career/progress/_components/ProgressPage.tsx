@@ -6,12 +6,13 @@ import { useSession } from "@/provider/SessionProvider";
 import { SubscriptionStatus } from "@prisma/client";
 import { Settings2, TrendingUp } from "lucide-react";
 import React, { useState } from "react";
+import CurrentProgressTab from "../tabs/CurrentProgressTab";
 
 const tabsValue = [
   {
     name: "Current Progress",
     value: "currentProgress",
-    component: "<HomeTab />",
+    component: <CurrentProgressTab />,
   },
   {
     name: "Insight",

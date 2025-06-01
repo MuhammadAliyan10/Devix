@@ -220,7 +220,7 @@ const UserInformationSection = ({ userId }: Props) => {
                 {userData.academicHistory.skills.length > 0 ? (
                   userData.academicHistory.skills.map((skill, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
-                      {skill}
+                      {skill.skillName}
                     </Badge>
                   ))
                 ) : (
@@ -240,7 +240,7 @@ const UserInformationSection = ({ userId }: Props) => {
                   userData.academicHistory.certifications.map((cert, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
                       <Award className="mr-1 h-3 w-3" />
-                      {cert}
+                      {cert.name}
                     </Badge>
                   ))
                 ) : (
@@ -314,7 +314,7 @@ const UserInformationSection = ({ userId }: Props) => {
                       <div key={index} className="flex items-center gap-2">
                         <Briefcase className="h-3 w-3 text-muted-foreground" />
                         <span className="text-sm text-foreground">
-                          {internship}
+                          {internship.company}
                         </span>
                       </div>
                     )
@@ -338,7 +338,7 @@ const UserInformationSection = ({ userId }: Props) => {
                       <div key={index} className="flex items-center gap-2">
                         <Calendar className="h-3 w-3 text-muted-foreground" />
                         <span className="text-sm text-foreground">
-                          {activity}
+                          {activity.name}
                         </span>
                       </div>
                     )
@@ -380,7 +380,7 @@ const UserInformationSection = ({ userId }: Props) => {
                         variant="secondary"
                         className="text-xs"
                       >
-                        {interest}
+                        {interest.name}
                       </Badge>
                     )
                   )

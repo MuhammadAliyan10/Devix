@@ -100,12 +100,15 @@ type DevixStore = {
   ) => void;
   validateStep: (stepId: keyof DevixFormState) => boolean;
   getStepValidationErrors: (stepId: keyof DevixFormState) => ValidationErrors;
-  addSkill: (skill: string) => void;
-  removeSkill: (skill: string) => void;
+  addSkill: (skill: { skillName: string; proficiency?: string }) => void;
+  removeSkill: (skillName: string) => void;
   addCareerGoal: (goal: string) => void;
   removeCareerGoal: (goal: string) => void;
-  addCareerInterest: (interest: string) => void;
-  removeCareerInterest: (interest: string) => void;
+  addCareerInterest: (interest: {
+    name: string;
+    subscriptionTier: SubscriptionStatus;
+  }) => void;
+  removeCareerInterest: (name: string) => void;
   resetForm: () => void;
   setModalOpen: (isOpen: boolean) => void;
   setCompleted: (isCompleted: boolean) => void;
@@ -297,10 +300,10 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
     });
   },
 
-  removeSkill: (skillToRemove) => {
+  removeSkill: (skillName) => {
     set((state) => {
       const newSkills = state.formData.academicHistory.skills.filter(
-        (skill) => skill !== skillToRemove
+        (skill) => skill.skillName !== skillName
       );
       const newAcademicHistory = {
         ...state.formData.academicHistory,
@@ -367,10 +370,10 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
     });
   },
 
-  removeCareerInterest: (interestToRemove) => {
+  removeCareerInterest: (name) => {
     set((state) => {
       const newInterests = state.formData.futurePlans.careerInterests.filter(
-        (interest) => interest !== interestToRemove
+        (interest) => interest.name !== name
       );
       const newFuturePlans = {
         ...state.formData.futurePlans,

@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LearningStyle } from "@/lib/types";
+import { LearningStyle, SubscriptionStatus } from "@/lib/types";
 
 const FuturePlansStep = () => {
   const {
@@ -28,7 +28,10 @@ const FuturePlansStep = () => {
   const errors = getStepValidationErrors("futurePlans");
 
   const [newCareerGoal, setNewCareerGoal] = useState("");
-  const [newCareerInterest, setNewCareerInterest] = useState("");
+  const [newCareerInterest, setNewCareerInterest] = useState({
+    name: "",
+    subscriptionTier: SubscriptionStatus.FREE,
+  });
   const [newPreferredDay, setNewPreferredDay] = useState("");
 
   const handleAddPreferredDay = () => {
@@ -51,6 +54,19 @@ const FuturePlansStep = () => {
         (d) => d !== day
       ),
     });
+  };
+
+  const handleAddCareerInterest = () => {
+    if (newCareerInterest.name.trim()) {
+      addCareerInterest({
+        name: newCareerInterest.name,
+        subscriptionTier: newCareerInterest.subscriptionTier,
+      });
+      setNewCareerInterest({
+        name: "",
+        subscriptionTier: SubscriptionStatus.FREE,
+      });
+    }
   };
 
   return (
@@ -125,41 +141,63 @@ const FuturePlansStep = () => {
           {futurePlans.careerInterests.map((interest, index) => (
             <div key={index} className="flex items-center gap-2">
               <Input
-                value={interest}
+                value={`${interest.name} (${interest.subscriptionTier})`}
                 readOnly
                 className="bg-background border-border h-9 text-sm"
               />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => removeCareerInterest(interest)}
+                onClick={() => removeCareerInterest(interest.name)}
                 className="text-destructive hover:text-destructive/80 h-9 w-9"
               >
                 <Trash2 size={14} />
               </Button>
             </div>
           ))}
-          <div className="flex items-center gap-2">
-            <Input
-              value={newCareerInterest}
-              onChange={(e) => setNewCareerInterest(e.target.value)}
-              className="bg-background border-border h-9 text-sm"
-              placeholder="Add new career interest"
-            />
-            <Button
-              size="icon"
-              onClick={() => {
-                if (newCareerInterest.trim()) {
-                  addCareerInterest(newCareerInterest);
-                  setNewCareerInterest("");
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div className="col-span-2">
+              <Input
+                value={newCareerInterest.name}
+                onChange={(e) =>
+                  setNewCareerInterest({
+                    ...newCareerInterest,
+                    name: e.target.value,
+                  })
                 }
-              }}
-              disabled={!newCareerInterest.trim()}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 w-9 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-background border-border h-9 text-sm"
+                placeholder="Add new career interest"
+              />
+            </div>
+            <Select
+              value={newCareerInterest.subscriptionTier}
+              onValueChange={(value) =>
+                setNewCareerInterest({
+                  ...newCareerInterest,
+                  subscriptionTier: value as SubscriptionStatus,
+                })
+              }
             >
-              <Plus size={14} />
-            </Button>
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder="Select tier" />
+              </SelectTrigger>
+              <SelectContent className="bg-background border-border text-sm">
+                {Object.values(SubscriptionStatus).map((tier) => (
+                  <SelectItem key={tier} value={tier}>
+                    {tier}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+          <Button
+            onClick={handleAddCareerInterest}
+            disabled={!newCareerInterest.name.trim()}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Plus size={14} className="mr-2" />
+            Add Career Interest
+          </Button>
         </div>
       </div>
 
