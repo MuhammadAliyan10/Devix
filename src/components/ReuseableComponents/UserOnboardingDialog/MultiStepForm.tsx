@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, Check, ChevronRight, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { useDevixStore } from "@/store/useDevixStore";
@@ -20,7 +19,6 @@ import {
   saveAcademicHistory,
   saveCurrentStatus,
   saveFuturePlans,
-  queueAITraining,
 } from "@/app/actions/data";
 import { useSession } from "@/provider/SessionProvider";
 
@@ -43,7 +41,9 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
     formData,
     setSubmitting,
     setCompleted,
+    submitForm,
   } = useDevixStore();
+
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const { user } = useSession();
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
@@ -51,7 +51,6 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isTraining, setIsTraining] = useState(false);
-  const router = useRouter();
 
   const saveStepData = async (stepId: string): Promise<boolean> => {
     if (!user?.id) {
@@ -154,20 +153,11 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
         }
         setCompletedSteps([...completedSteps, "futurePlans"]);
       }
-
       setIsTraining(true);
-      const trainingResponse = await queueAITraining(user.id);
-      if (!trainingResponse.success) {
-        console.warn(
-          "AI training queue failed, but proceeding:",
-          trainingResponse.message
-        );
-      }
-
       setCompleted(true);
       onComplete(formData.basicInfo.role);
       toast.success("Profile data saved successfully! AI training initiated.");
-      router.refresh();
+      await submitForm(user.id);
     } catch (error) {
       console.error("Error completing onboarding:", error);
       toast.error("Failed to complete onboarding. Please try again.");
@@ -176,7 +166,6 @@ const MultiStepForm = ({ steps, onComplete }: Props) => {
       setSubmitting(false);
       setIsLoading(false);
       setIsTraining(false);
-      setModalOpen(false);
     }
   };
 

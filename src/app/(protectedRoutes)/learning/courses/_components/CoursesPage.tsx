@@ -9,12 +9,13 @@ import { SubscriptionStatus } from "@prisma/client";
 import { BookOpen, Settings2 } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
+import RecommendedCoursesTab from "../tabs/RecommendedCoursesTab";
 
 const tabsValue = [
   {
     name: "Recommended",
     value: "recommended",
-    component: "<HomeTab />",
+    component: <RecommendedCoursesTab />,
   },
   {
     name: "Progress",

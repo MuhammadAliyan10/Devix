@@ -9,6 +9,9 @@ import FuturePlansStep from "./FuturePlansStep";
 import { useDevixStore } from "@/store/useDevixStore";
 import { GraduationCap } from "lucide-react";
 import { useSession } from "@/provider/SessionProvider";
+import { DialogTitle } from "@radix-ui/react-dialog";
+import SuccessStep from "./SuccessStep";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const steps = [
   {
@@ -74,14 +77,13 @@ export default function UserOnboardingDialog({ text }: props) {
         </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[1300px] p-0 bg-transparent border-none">
+        <VisuallyHidden>
+          <DialogTitle>User Onboarding</DialogTitle>
+        </VisuallyHidden>
         {isCompleted ? (
-          <div className="text-center p-8">
-            <h2 className="text-xl font-semibold text-foreground">
-              Onboarding Complete!
-            </h2>
-            <p className="text-sm text-muted-foreground mt-3">
-              Your information has been successfully saved.
-            </p>
+          <div className="bg-muted text-primary rounded-lg overflow-hidden">
+            <DialogTitle className="sr-only">Onboarding completed</DialogTitle>
+            <SuccessStep />
           </div>
         ) : (
           <MultiStepForm steps={steps} onComplete={handleCompletion} />

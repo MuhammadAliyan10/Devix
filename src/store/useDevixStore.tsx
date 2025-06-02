@@ -74,6 +74,7 @@ type DevixStore = {
   isCompleted: boolean;
   isSubmitting: boolean;
   formData: DevixFormState;
+  feedback: string | null;
   validation: ValidationState;
   initializeStore: (userId: string) => Promise<void>;
   updateBasicInfoField: <K extends keyof DevixFormState["basicInfo"]>(
@@ -109,6 +110,7 @@ type DevixStore = {
     subscriptionTier: SubscriptionStatus;
   }) => void;
   removeCareerInterest: (name: string) => void;
+  submitForm: (userId: string) => Promise<void>;
   resetForm: () => void;
   setModalOpen: (isOpen: boolean) => void;
   setCompleted: (isCompleted: boolean) => void;
@@ -121,6 +123,7 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
   isSubmitting: false,
   formData: initialState,
   validation: initialValidationData,
+  feedback: null,
 
   initializeStore: async (userId: string) => {
     const initialData = await fetchUserData(userId);
@@ -386,6 +389,28 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
       };
     });
   },
+  submitForm: async (userId: string) => {
+    set({ isSubmitting: true });
+    try {
+      const feedbackResponse = await fetch(
+        `http://localhost:5001/api/user/${userId}/feedback`
+      );
+      if (!feedbackResponse.ok) {
+        throw new Error(
+          `Failed to fetch feedback: ${feedbackResponse.statusText}`
+        );
+      }
+      const feedbackData = await feedbackResponse.json();
+      set({
+        feedback: feedbackData.feedback,
+        isCompleted: true,
+        isSubmitting: false,
+      });
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      set({ isSubmitting: false });
+    }
+  },
 
   resetForm: () =>
     set({
@@ -393,5 +418,6 @@ export const useDevixStore = create<DevixStore>((set, get) => ({
       isSubmitting: false,
       formData: initialState,
       validation: initialValidationData,
+      feedback: null,
     }),
 }));
