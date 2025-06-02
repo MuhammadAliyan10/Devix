@@ -121,6 +121,7 @@ model User {
   quizzes                Quiz[]
   quizResponses          QuizResponse[]
   groups                 GroupMember[]
+  challenge              Challenge[]
   posts                  BlogPost[]
   comments               BlogComment[]
   notifications          Notification[]
@@ -224,10 +225,11 @@ model CareerGoal {
   id        String   @id @default(uuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  goal      String // e.g., "Become a Data Scientist"
+  goal      String
+  progress  Float    @default(0)
+  deadline  DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   @@index([userId])
 }
 
@@ -239,6 +241,17 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
+}
+model Challenge {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade) // Relation to User model
+  challenge String
+  reward    String
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId])
 }
 
 // Follow for social connections
