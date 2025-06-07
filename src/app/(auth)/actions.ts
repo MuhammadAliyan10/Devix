@@ -1,11 +1,12 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { lucia, validateRequest } from "../actions/auth";
+import { validateRequest } from "../actions/auth";
 import { prismaClient } from "@/lib/prismaClient";
 import { hash, verify } from "@node-rs/argon2";
 import { generateIdFromEntropySize } from "lucia";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { lucia } from "../actions/lucia";
 
 export async function logout() {
   try {
