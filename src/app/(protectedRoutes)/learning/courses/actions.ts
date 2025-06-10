@@ -2,7 +2,7 @@ interface Course {
   id: string;
   courseName: string;
   courseDescription: string;
-  thumbnail: string;
+  thumbnail: string | null;
   url: string;
   level: "Beginner" | "Intermediate" | "Advanced";
   rating: number;
@@ -11,13 +11,17 @@ interface Course {
 interface CoursesResponse {
   courses: {
     courses: Course[];
-  };
+  } | null;
 }
 
 export async function fetchUserCourses(userId: string): Promise<Course[]> {
+  if (!userId) {
+    throw new Error("Invalid user ID");
+  }
+
   try {
     const response = await fetch(
-      `http://localhost:5001/api/user/${userId}/courses`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/user/${userId}/courses`,
       {
         method: "GET",
         headers: {
@@ -35,60 +39,73 @@ export async function fetchUserCourses(userId: string): Promise<Course[]> {
 
     const data: CoursesResponse = await response.json();
 
-    // Extract courses from nested structure
-    return data.courses?.courses || [];
+    // Validate response structure
+    if (!data?.courses?.courses || !Array.isArray(data.courses.courses)) {
+      return [];
+    }
+
+    // Validate each course object
+    const validCourses = data.courses.courses.filter(
+      (course): course is Course =>
+        course &&
+        typeof course.id === "string" &&
+        typeof course.courseName === "string" &&
+        (typeof course.courseDescription === "string" ||
+          course.courseDescription === null) &&
+        (typeof course.thumbnail === "string" || course.thumbnail === null) &&
+        typeof course.url === "string" &&
+        ["Beginner", "Intermediate", "Advanced"].includes(course.level) &&
+        typeof course.rating === "number" &&
+        course.rating >= 0 &&
+        course.rating <= 5
+    );
+
+    return validCourses;
   } catch (error) {
     console.error("Error fetching user courses:", error);
     throw new Error("Failed to load courses. Please try again later.");
   }
 }
 
-// Client-side utility functions for localStorage management
 export const courseStorageUtils = {
-  // Store course generation timestamp
-  setCoursesGenerated: (userId: string) => {
-    if (typeof window !== "undefined") {
-      const timestamp = Date.now();
-      localStorage.setItem(`courses_generated_${userId}`, timestamp.toString());
-    }
+  setCoursesGenerated: (userId: string): void => {
+    if (typeof window === "undefined" || !userId) return;
+    localStorage.setItem(`courses_generated_${userId}`, Date.now().toString());
   },
 
-  // Check if courses were generated and if a month has passed
   shouldShowGenerateButton: (userId: string): boolean => {
-    if (typeof window === "undefined") return true;
+    if (typeof window === "undefined" || !userId) return true;
 
     const timestamp = localStorage.getItem(`courses_generated_${userId}`);
     if (!timestamp) return true;
 
-    const generatedTime = parseInt(timestamp);
+    const generatedTime = parseInt(timestamp, 10);
+    if (isNaN(generatedTime)) return true;
+
     const oneMonthInMs = 30 * 24 * 60 * 60 * 1000; // 30 days
-    const currentTime = Date.now();
-
-    return currentTime - generatedTime > oneMonthInMs;
+    return Date.now() - generatedTime > oneMonthInMs;
   },
 
-  // Clear course generation record (for testing or manual reset)
-  clearCoursesRecord: (userId: string) => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(`courses_generated_${userId}`);
-    }
+  clearCoursesRecord: (userId: string): void => {
+    if (typeof window === "undefined" || !userId) return;
+    localStorage.removeItem(`courses_generated_${userId}`);
   },
 
-  // Get time until next generation allowed
   getTimeUntilNextGeneration: (userId: string): string => {
-    if (typeof window === "undefined") return "";
+    if (typeof window === "undefined" || !userId) return "";
 
     const timestamp = localStorage.getItem(`courses_generated_${userId}`);
     if (!timestamp) return "";
 
-    const generatedTime = parseInt(timestamp);
+    const generatedTime = parseInt(timestamp, 10);
+    if (isNaN(generatedTime)) return "";
+
     const oneMonthInMs = 30 * 24 * 60 * 60 * 1000;
-    const currentTime = Date.now();
-    const timeLeft = generatedTime + oneMonthInMs - currentTime;
+    const timeLeft = generatedTime + oneMonthInMs - Date.now();
 
     if (timeLeft <= 0) return "";
 
     const daysLeft = Math.ceil(timeLeft / (24 * 60 * 60 * 1000));
-    return `${daysLeft} days`;
+    return `${daysLeft} day${daysLeft !== 1 ? "s" : ""}`;
   },
 };

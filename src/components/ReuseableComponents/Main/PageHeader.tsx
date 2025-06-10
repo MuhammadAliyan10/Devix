@@ -16,6 +16,7 @@ const PageHeader = ({
   heading,
   subtitle,
   rightComponent,
+
   showSeparator = true,
   size = "md",
   className = "",
