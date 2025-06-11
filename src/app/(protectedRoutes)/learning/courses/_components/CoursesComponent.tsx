@@ -1,18 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  AlertCircle,
-  Clock,
-  RefreshCw,
-  Sparkles,
-  RotateCw,
-  BookOpen,
-} from "lucide-react";
+import { AlertCircle, BookOpen, RefreshCw, Sparkles } from "lucide-react";
 import { useSession } from "@/provider/SessionProvider";
 import { CourseCard, SkeletonCard } from "./CourseCard";
-import { courseStorageUtils } from "../courseStorageUtils";
+import { fetchAndStoreUserCourses, getUserCourses } from "../actions";
 
-// Interface for course data
 interface Course {
   id: string;
   courseName: string;
@@ -23,149 +15,46 @@ interface Course {
   rating: number;
 }
 
-// Interface for API response
-interface CoursesResponse {
-  user_id?: string;
-  error?: string;
-  courses: { courses: Course[] } | null;
-}
-
-// Fetch courses from API with retry logic
-async function fetchUserCourses(
-  userId: string,
-  retries = 2
-): Promise<Course[]> {
-  if (!userId) {
-    throw new Error("Invalid user ID");
-  }
-
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-  let lastError: Error | null = null;
-
-  for (let attempt = 1; attempt <= retries + 1; attempt++) {
-    try {
-      const response = await fetch(`${apiUrl}/api/user/${userId}/courses`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${
-            localStorage.getItem("session_token") || ""
-          }`,
-        },
-        cache: "no-store",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage =
-          errorData.error ||
-          `HTTP error: ${response.status} ${response.statusText}`;
-        throw new Error(errorMessage);
-      }
-
-      const data: CoursesResponse = await response.json();
-
-      if (
-        data.error ||
-        !data.courses?.courses ||
-        !Array.isArray(data.courses.courses)
-      ) {
-        throw new Error(data.error || "Invalid response format");
-      }
-
-      const validCourses = data.courses.courses.filter(
-        (course): course is Course =>
-          course &&
-          typeof course.id === "string" &&
-          typeof course.courseName === "string" &&
-          typeof course.courseDescription === "string" &&
-          (typeof course.thumbnail === "string" || course.thumbnail === null) &&
-          typeof course.url === "string" &&
-          ["Beginner", "Intermediate", "Advanced"].includes(course.level) &&
-          typeof course.rating === "number" &&
-          course.rating >= 0 &&
-          course.rating <= 5
-      );
-
-      if (validCourses.length === 0 && data.error) {
-        throw new Error(data.error);
-      }
-
-      return validCourses;
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error("Unknown error");
-      console.error(`Attempt ${attempt} failed:`, lastError);
-      if (attempt <= retries) {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-      }
-    }
-  }
-
-  throw lastError || new Error("Failed to load courses after retries.");
-}
-
 const CoursesComponent: React.FC = () => {
   const { user, session } = useSession();
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showGenerateButton, setShowGenerateButton] = useState(true);
-  const [timeUntilNext, setTimeUntilNext] = useState<string>("");
 
   const userId = user?.id;
 
-  // Initialize component state based on localStorage
   useEffect(() => {
     if (!userId || !session) return;
 
-    const cachedCourses = courseStorageUtils.getCachedCourses(userId);
-    const isCacheExpired = courseStorageUtils.isCacheExpired(userId);
-    const shouldShow = courseStorageUtils.shouldShowGenerateButton(userId);
+    const loadCourses = async () => {
+      setIsLoading(true);
+      try {
+        const dbCourses = await getUserCourses(userId);
+        setCourses(dbCourses);
+      } catch (error) {
+        console.error("Error loading courses:", error);
+        setError("Failed to load courses. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    setShowGenerateButton(shouldShow);
-    setTimeUntilNext(courseStorageUtils.getTimeUntilGeneration(userId));
-
-    if (cachedCourses.length > 0 && !isCacheExpired) {
-      setCourses(cachedCourses);
-    } else if (shouldShow) {
-      handleGenerateCourses();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadCourses();
   }, [userId, session]);
 
-  // Fetch and handle course generation
-  const handleGenerateCourses = async (forceRefresh = false) => {
+  const handleGenerateCourses = async () => {
     if (!userId || !session) {
       setError("Please sign in to generate courses");
       return;
-    }
-
-    // Skip API call if valid cache exists and no force refresh
-    if (!forceRefresh) {
-      const cachedCourses = courseStorageUtils.getCachedCourses(userId);
-      if (
-        cachedCourses.length > 0 &&
-        !courseStorageUtils.isCacheExpired(userId)
-      ) {
-        setCourses(cachedCourses);
-        setShowGenerateButton(false);
-        setTimeUntilNext(courseStorageUtils.getTimeUntilGeneration(userId));
-        setError(null);
-        return;
-      }
     }
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const fetchedCourses = await fetchUserCourses(userId);
-      if (fetchedCourses.length > 0) {
-        setCourses(fetchedCourses);
-        courseStorageUtils.setCoursesGenerated(userId, fetchedCourses);
-        setShowGenerateButton(false);
-        setTimeUntilNext(courseStorageUtils.getTimeUntilGeneration(userId));
-      } else {
+      const fetchedCourses = await fetchAndStoreUserCourses(userId);
+      setCourses(fetchedCourses);
+      if (fetchedCourses.length === 0) {
         setError("No courses found. Please try again.");
       }
     } catch (err) {
@@ -184,15 +73,6 @@ const CoursesComponent: React.FC = () => {
     }
   };
 
-  // Handle user-initiated refresh
-  const handleRefreshCourses = () => {
-    courseStorageUtils.clearCoursesRecord(userId!);
-    setShowGenerateButton(true);
-    setTimeUntilNext("");
-    handleGenerateCourses(true);
-  };
-
-  // Render sign-in prompt if no session
   if (!session || !userId) {
     return (
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -221,60 +101,32 @@ const CoursesComponent: React.FC = () => {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Generate Button or Time Left Info */}
       <div className="text-center mb-8">
-        {showGenerateButton ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <motion.button
+            onClick={handleGenerateCourses}
+            disabled={isLoading}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="inline-flex items-center gap-3 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-4 rounded-xl text-md font-semibold hover:from-primary/90 hover:to-primary/70 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Generate personalized courses"
           >
-            <motion.button
-              onClick={() => handleGenerateCourses()}
-              disabled={isLoading}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="inline-flex items-center gap-3 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-4 rounded-xl text-md font-semibold hover:from-primary/90 hover:to-primary/70 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Generate personalized courses"
-            >
-              {isLoading ? (
-                <RefreshCw
-                  className="w-5 h-5 animate-spin"
-                  aria-hidden="true"
-                />
-              ) : (
-                <Sparkles className="w-5 h-5" aria-hidden="true" />
-              )}
-              {isLoading ? "Generating Your Courses..." : "Generate AI Courses"}
-            </motion.button>
-            <p className="text-sm text-muted-foreground mt-3">
-              Get personalized course recommendations based on your profile
-            </p>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div className="inline-flex items-center gap-2 bg-muted/50 text-muted-foreground px-4 py-2 rounded-full text-sm">
-              <Clock className="w-4 h-4" aria-hidden="true" />
-              Next course generation available in {timeUntilNext}
-            </div>
-            <motion.button
-              onClick={handleRefreshCourses}
-              disabled={true}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="ml-4 inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Refresh courses"
-            >
-              <RotateCw className="w-4 h-4" aria-hidden="true" />
-              Refresh Courses
-            </motion.button>
-          </motion.div>
-        )}
+            {isLoading ? (
+              <RefreshCw className="w-5 h-5 animate-spin" aria-hidden="true" />
+            ) : (
+              <Sparkles className="w-5 h-5" aria-hidden="true" />
+            )}
+            {isLoading ? "Generating Your Courses..." : "Generate AI Courses"}
+          </motion.button>
+          <p className="text-sm text-muted-foreground mt-3">
+            Get personalized course recommendations based on your profile
+          </p>
+        </motion.div>
       </div>
 
-      {/* Error Message */}
       {error && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -288,7 +140,6 @@ const CoursesComponent: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Courses Grid */}
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div

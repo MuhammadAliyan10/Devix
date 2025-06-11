@@ -1,3 +1,4 @@
+// schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,7 +8,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enums for better code organization
+// Existing enums (unchanged)
 enum Role {
   STUDENT
   ADMIN
@@ -86,7 +87,28 @@ enum EducationLevel {
   COLLEGE
 }
 
-// User model: Core user data, supports non-educated users
+// New Course model
+model Course {
+  id               String         @id @default(uuid())
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  learningPathId   String?
+  learningPath     LearningPath?  @relation(fields: [learningPathId], references: [id], onDelete: SetNull)
+  courseName       String
+  courseDescription String
+  thumbnail        String?
+  url              String
+  level            DifficultyLevel
+  rating           Float
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  progress         Progress[]     // Link to Progress for completion tracking
+
+  @@index([userId])
+  @@index([learningPathId])
+}
+
+// Updated User model (add lastCourseGeneratedAt)
 model User {
   id                     String               @id @default(uuid())
   email                  String               @unique
@@ -96,9 +118,9 @@ model User {
   profileImageUrl        String?              @map("profile_image_url")
   role                   Role                 @default(STUDENT)
   educationLevel         EducationLevel       @default(COLLEGE)
-  priorEducation         PriorEducation[] // Added relation to PriorEducation
-  certifications         Certification[] // Added relation to Certification
-  extracurriculars       Extracurricular[] // Added relation to Extracurricular
+  priorEducation         PriorEducation[]
+  certifications         Certification[]
+  extracurriculars       Extracurricular[]
   internships            Internship[]
   careerGoals            CareerGoal[]
   currentSemester        Int?                 @map("current_semester")
@@ -108,10 +130,12 @@ model User {
   institution            String?
   userExperience         UserExperience       @default(FRESHER)
   preferredLearningStyle LearningStyle        @default(VIDEO)
+  timeAvailabilityDays   Int?                 @map("time_availability_days")
   timeAvailabilityHours  Int?                 @map("time_availability_hours")
   subscriptionStatus     SubscriptionStatus   @default(FREE)
   trialStartDate         DateTime?            @map("trial_start_date")
   trialEndDate           DateTime?            @map("trial_end_date")
+  lastCourseGeneratedAt  DateTime?            @map("last_course_generated_at") // New field for generation timestamp
   createdAt              DateTime             @default(now())
   updatedAt              DateTime             @updatedAt
   learningPaths          LearningPath[]
@@ -135,10 +159,12 @@ model User {
   leaderboardEntries     Leaderboard[]
   userSettings           UserSettings?
   projects               Project[]
+  courses                Course[]             // New relation to Course model
 
   @@index([email])
 }
 
+// Existing models (unchanged, abbreviated for brevity)
 model PreviousSemester {
   id            String   @id @default(uuid())
   userId        String
@@ -148,7 +174,6 @@ model PreviousSemester {
   creditsEarned Int?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-
   @@index([userId])
 }
 
@@ -160,7 +185,6 @@ model UserSkill {
   proficiency String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
   @@unique([userId, skillName])
   @@index([userId])
 }
@@ -169,13 +193,12 @@ model PriorEducation {
   id            String   @id @default(uuid())
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  level         String // e.g., "High School", "Bachelor's"
+  level         String
   institution   String
   yearCompleted Int
   grades        String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-
   @@index([userId])
 }
 
@@ -183,13 +206,12 @@ model Certification {
   id            String   @id @default(uuid())
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name          String // e.g., "AWS Certified Developer"
-  issuer        String // e.g., "Amazon"
+  name          String
+  issuer        String
   year          Int
   certificateId String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-
   @@index([userId])
 }
 
@@ -197,12 +219,11 @@ model Extracurricular {
   id        String   @id @default(uuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String // e.g., "Debate Club"
-  role      String // e.g., "President"
-  duration  String // e.g., "2023-2024"
+  name      String
+  role      String
+  duration  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   @@index([userId])
 }
 
@@ -210,14 +231,13 @@ model Internship {
   id           String    @id @default(uuid())
   userId       String
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company      String // e.g., "Google"
-  role         String // e.g., "Software Engineer Intern"
-  startDate    DateTime // e.g., "2023-06-01"
+  company      String
+  role         String
+  startDate    DateTime
   endDate      DateTime?
-  skillsGained String[] // e.g., ["Python", "Cloud Computing"]
+  skillsGained String[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-
   @@index([userId])
 }
 
@@ -239,13 +259,13 @@ model Session {
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@map("sessions")
 }
+
 model Challenge {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade) // Relation to User model
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   challenge String
   reward    String
   status    String   @default("pending")
@@ -254,7 +274,6 @@ model Challenge {
   @@index([userId])
 }
 
-// Follow for social connections
 model Follow {
   id          String   @id @default(uuid())
   followerId  String
@@ -262,27 +281,23 @@ model Follow {
   followingId String
   following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
-
   @@unique([followerId, followingId])
   @@index([followerId])
   @@index([followingId])
 }
 
-// CurrentSubject for academic status
 model CurrentSubject {
   id        String     @id @default(uuid())
   userId    String
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String // e.g., "Linear Algebra"
+  name      String
   progress  Float      @default(0)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   resources Resource[]
-
   @@index([userId])
 }
 
-// CareerInterest for career path selection
 model CareerInterest {
   id           String     @id @default(uuid())
   userId       String
@@ -291,30 +306,26 @@ model CareerInterest {
   careerPath   CareerPath @relation(fields: [careerPathId], references: [id], onDelete: Cascade)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-
   @@unique([userId, careerPathId])
   @@index([userId])
 }
 
-// CareerPath for available career paths
 model CareerPath {
   id               String             @id @default(uuid())
-  name             String // e.g., "Data Scientist"
-  subfield         String? // e.g., "Machine Learning"
-  subscriptionTier SubscriptionStatus // FREE, PREMIUM, ENTERPRISE
+  name             String
+  subfield         String?
+  subscriptionTier SubscriptionStatus
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   careerInterests  CareerInterest[]
-
   @@index([name, subfield])
 }
 
-// LearningPath for personalized tracks
 model LearningPath {
   id          String               @id @default(uuid())
   userId      String
   user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title       String // e.g., "Data Scientist Path"
+  title       String
   status      LearningPathStatus   @default(ACTIVE)
   startDate   DateTime             @default(now())
   endDate     DateTime?
@@ -326,62 +337,58 @@ model LearningPath {
   resources   Resource[]
   projects    Project[]
   adjustments LearningAdjustment[]
-
+  courses     Course[]             // New relation to Course model
   @@index([userId])
 }
 
-// Resource for educational content
 model Resource {
   id              String          @id @default(uuid())
   learningPathId  String
   learningPath    LearningPath    @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
   subjectId       String?
   subject         CurrentSubject? @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  type            ResourceType // TEXT, IFRAME
-  difficulty      DifficultyLevel // BEGINNER, INTERMEDIATE, ADVANCED
-  url             String? // YouTube iframe or text URL
-  content         String? // Text content or summary
-  careerRelevance String? // e.g., "Matrix operations for Data Science"
+  type            ResourceType
+  difficulty      DifficultyLevel
+  url             String?
+  content         String?
+  careerRelevance String?
   weekNumber      Int
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
-
   @@index([learningPathId, subjectId])
 }
 
-// Project for user assignments
 model Project {
   id             String         @id @default(uuid())
   userId         String
   user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   learningPathId String
   learningPath   LearningPath   @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
-  title          String // e.g., "Build a Neural Network"
-  githubUrl      String? // GitHub repository URL
+  title          String
+  githubUrl      String?
   status         ProgressStatus @default(NOT_STARTED)
   deadline       DateTime?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
-
   @@index([userId, learningPathId])
 }
 
-// Progress for tracking engagement
 model Progress {
   id               String       @id @default(uuid())
   userId           String
   user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   learningPathId   String
   learningPath     LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  courseId         String?
+  course           Course?      @relation(fields: [courseId], references: [id], onDelete: SetNull)
   timeSpentMinutes Int          @default(0)
   lastAccessed     DateTime     @default(now())
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
-
   @@index([userId, learningPathId])
+  @@index([courseId])
 }
 
-// Attendance for tracking participation
 model Attendance {
   id             String           @id @default(uuid())
   userId         String
@@ -392,26 +399,22 @@ model Attendance {
   date           DateTime
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-
   @@index([userId, learningPathId])
   @@index([date])
 }
 
-// LearningAdjustment for dynamic resource changes
 model LearningAdjustment {
   id             String       @id @default(uuid())
   userId         String
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   learningPathId String
   learningPath   LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
-  adjustmentType String // e.g., "DECREASE_DIFFICULTY"
-  reason         String? // e.g., "Low quiz score"
+  adjustmentType String
+  reason         String?
   createdAt      DateTime     @default(now())
-
   @@index([userId, learningPathId])
 }
 
-// AIQuery for storing AI interactions
 model AIQuery {
   id        String   @id @default(uuid())
   userId    String
@@ -420,11 +423,9 @@ model AIQuery {
   response  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   @@index([userId])
 }
 
-// Quiz for weekly assessments
 model Quiz {
   id             String         @id @default(uuid())
   learningPathId String
@@ -439,11 +440,9 @@ model Quiz {
   updatedAt      DateTime       @updatedAt
   questions      QuizQuestion[]
   responses      QuizResponse[]
-
   @@index([learningPathId, userId])
 }
 
-// QuizQuestion for quiz content
 model QuizQuestion {
   id            String         @id @default(uuid())
   quizId        String
@@ -454,11 +453,9 @@ model QuizQuestion {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   responses     QuizResponse[]
-
   @@index([quizId])
 }
 
-// QuizResponse for user attempts
 model QuizResponse {
   id             String       @id @default(uuid())
   quizId         String
@@ -470,11 +467,9 @@ model QuizResponse {
   selectedAnswer String
   isCorrect      Boolean
   createdAt      DateTime     @default(now())
-
   @@index([quizId, userId, questionId])
 }
 
-// Group for community interaction
 model Group {
   id          String        @id @default(uuid())
   name        String
@@ -482,11 +477,9 @@ model Group {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   members     GroupMember[]
-
   @@index([name])
 }
 
-// GroupMember for group membership
 model GroupMember {
   id       String   @id @default(uuid())
   groupId  String
@@ -494,7 +487,6 @@ model GroupMember {
   userId   String
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   joinedAt DateTime @default(now())
-
   @@unique([groupId, userId])
   @@index([groupId])
   @@index([userId])
@@ -508,11 +500,9 @@ model Notification {
   message   String
   isRead    Boolean          @default(false)
   createdAt DateTime         @default(now())
-
   @@index([userId])
 }
 
-// BlogPost for user-generated content
 model BlogPost {
   id        String        @id @default(uuid())
   userId    String
@@ -522,11 +512,9 @@ model BlogPost {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   comments  BlogComment[]
-
   @@index([userId])
 }
 
-// BlogComment for blog interactions
 model BlogComment {
   id        String   @id @default(uuid())
   postId    String
@@ -536,26 +524,22 @@ model BlogComment {
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   @@index([postId])
   @@index([userId])
 }
 
-// Leaderboard for gamification
 model Leaderboard {
   id        String   @id @default(uuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  score     Float // Aggregated quiz scores
+  score     Float
   rank      Int
-  period    String // WEEKLY, MONTHLY
+  period    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   @@index([userId, period])
 }
 
-// UserBadge for rewards
 model UserBadge {
   id          String   @id @default(uuid())
   userId      String
@@ -565,21 +549,18 @@ model UserBadge {
   earnedAt    DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
   @@unique([userId, badgeName])
   @@index([userId])
 }
 
-// UserSettings for user preferences
 model UserSettings {
   id                String            @id @default(uuid())
   userId            String            @unique
   user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   language          String            @default("en")
   accessibilityMode AccessibilityMode @default(DEFAULT)
-  notificationPrefs Json              @default("{}") // e.g., {"quiz_day": "Sunday"}
+  notificationPrefs Json              @default("{}")
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
-
   @@index([userId])
 }

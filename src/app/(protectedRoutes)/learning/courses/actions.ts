@@ -1,3 +1,7 @@
+"use server";
+import { prismaClient } from "@/lib/prismaClient";
+import { DifficultyLevel } from "@prisma/client";
+
 interface Course {
   id: string;
   courseName: string;
@@ -9,12 +13,12 @@ interface Course {
 }
 
 interface CoursesResponse {
-  courses: {
-    courses: Course[];
-  } | null;
+  courses: Course[] | null;
 }
 
-export async function fetchUserCourses(userId: string): Promise<Course[]> {
+export async function fetchAndStoreUserCourses(
+  userId: string
+): Promise<Course[]> {
   if (!userId) {
     throw new Error("Invalid user ID");
   }
@@ -27,7 +31,7 @@ export async function fetchUserCourses(userId: string): Promise<Course[]> {
         headers: {
           "Content-Type": "application/json",
         },
-        cache: "no-store",
+        cache: "no-cache",
       }
     );
 
@@ -39,19 +43,16 @@ export async function fetchUserCourses(userId: string): Promise<Course[]> {
 
     const data: CoursesResponse = await response.json();
 
-    // Validate response structure
-    if (!data?.courses?.courses || !Array.isArray(data.courses.courses)) {
+    if (!data?.courses || !Array.isArray(data.courses)) {
       return [];
     }
 
-    // Validate each course object
-    const validCourses = data.courses.courses.filter(
+    const validCourses = data.courses.filter(
       (course): course is Course =>
         course &&
         typeof course.id === "string" &&
         typeof course.courseName === "string" &&
-        (typeof course.courseDescription === "string" ||
-          course.courseDescription === null) &&
+        typeof course.courseDescription === "string" &&
         (typeof course.thumbnail === "string" || course.thumbnail === null) &&
         typeof course.url === "string" &&
         ["Beginner", "Intermediate", "Advanced"].includes(course.level) &&
@@ -60,52 +61,74 @@ export async function fetchUserCourses(userId: string): Promise<Course[]> {
         course.rating <= 5
     );
 
+    // Clear existing courses for the user
+    await prismaClient.course.deleteMany({
+      where: { userId },
+    });
+
+    // Store new courses in database
+    await prismaClient.course.createMany({
+      data: validCourses.map((course) => ({
+        id: course.id,
+        userId,
+        courseName: course.courseName,
+        courseDescription: course.courseDescription,
+        thumbnail: course.thumbnail,
+        url: course.url,
+        level: course.level.toUpperCase() as DifficultyLevel,
+        rating: course.rating,
+      })),
+    });
+
     return validCourses;
   } catch (error) {
-    console.error("Error fetching user courses:", error);
+    console.error("Error fetching and storing user courses:", error);
     throw new Error("Failed to load courses. Please try again later.");
   }
 }
 
-export const courseStorageUtils = {
-  setCoursesGenerated: (userId: string): void => {
-    if (typeof window === "undefined" || !userId) return;
-    localStorage.setItem(`courses_generated_${userId}`, Date.now().toString());
-  },
+export async function getUserCourses(userId: string): Promise<Course[]> {
+  if (!userId) return [];
 
-  shouldShowGenerateButton: (userId: string): boolean => {
-    if (typeof window === "undefined" || !userId) return true;
+  try {
+    const userCourses = await prismaClient.course.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        courseName: true,
+        courseDescription: true,
+        thumbnail: true,
+        url: true,
+        level: true,
+        rating: true,
+      },
+    });
 
-    const timestamp = localStorage.getItem(`courses_generated_${userId}`);
-    if (!timestamp) return true;
-
-    const generatedTime = parseInt(timestamp, 10);
-    if (isNaN(generatedTime)) return true;
-
-    const oneMonthInMs = 30 * 24 * 60 * 60 * 1000; // 30 days
-    return Date.now() - generatedTime > oneMonthInMs;
-  },
-
-  clearCoursesRecord: (userId: string): void => {
-    if (typeof window === "undefined" || !userId) return;
-    localStorage.removeItem(`courses_generated_${userId}`);
-  },
-
-  getTimeUntilNextGeneration: (userId: string): string => {
-    if (typeof window === "undefined" || !userId) return "";
-
-    const timestamp = localStorage.getItem(`courses_generated_${userId}`);
-    if (!timestamp) return "";
-
-    const generatedTime = parseInt(timestamp, 10);
-    if (isNaN(generatedTime)) return "";
-
-    const oneMonthInMs = 30 * 24 * 60 * 60 * 1000;
-    const timeLeft = generatedTime + oneMonthInMs - Date.now();
-
-    if (timeLeft <= 0) return "";
-
-    const daysLeft = Math.ceil(timeLeft / (24 * 60 * 60 * 1000));
-    return `${daysLeft} day${daysLeft !== 1 ? "s" : ""}`;
-  },
-};
+    return userCourses
+      .map((course) => ({
+        ...course,
+        level:
+          course.level === "BEGINNER"
+            ? "Beginner"
+            : course.level === "INTERMEDIATE"
+            ? "Intermediate"
+            : "Advanced",
+      }))
+      .filter(
+        (course): course is Course =>
+          course &&
+          typeof course.id === "string" &&
+          typeof course.courseName === "string" &&
+          typeof course.courseDescription === "string" &&
+          (typeof course.thumbnail === "string" || course.thumbnail === null) &&
+          typeof course.url === "string" &&
+          ["Beginner", "Intermediate", "Advanced"].includes(course.level) &&
+          typeof course.rating === "number" &&
+          course.rating >= 0 &&
+          course.rating <= 5
+      );
+  } catch (error) {
+    console.error("Error fetching user courses from database:", error);
+    return [];
+  }
+}

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import RecommendedCoursesTab from "../tabs/RecommendedCoursesTab";
 import UserOnboardingDialog from "@/components/ReuseableComponents/UserOnboardingDialog";
 import CourseProgressTab from "../tabs/CourseProgressTab";
+import CoursesAssistantTab from "../tabs/CoursesAssistantTab";
 
 const CoursesPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -38,7 +39,7 @@ const CoursesPage = () => {
     {
       name: "Assistant",
       value: "assistant",
-      component: "<CareerTab userId={user.id} />",
+      component: <CoursesAssistantTab userId={user.id} />,
     },
   ];
 
