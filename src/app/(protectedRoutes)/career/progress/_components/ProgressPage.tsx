@@ -7,6 +7,7 @@ import { SubscriptionStatus } from "@prisma/client";
 import { Settings2, TrendingUp } from "lucide-react";
 import React, { useState } from "react";
 import CurrentProgressTab from "../tabs/CurrentProgressTab";
+import UserOnboardingDialog from "@/components/ReuseableComponents/UserOnboardingDialog";
 
 const tabsValue = [
   {
@@ -30,6 +31,23 @@ const ProgressPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const { user } = useSession();
+
+  if (!user.major || !user.institution) {
+    return (
+      <div className="w-full h-full flex flex-col justify-center items-center">
+        <div className="text-center leading-1 flex flex-col justify-center items-center">
+          <h3 className="text-4xl font-bold">Complete Your Onboarding</h3>
+          <p className="text-muted-foreground my-3 text-sm">
+            To provide personalized recommendations, track your progress, and
+            connect you <br />
+            with the most relevant resources, we need a few more details about
+            <br /> your academic background.
+          </p>
+          <UserOnboardingDialog text="User Onboarding" />
+        </div>
+      </div>
+    );
+  }
   return (
     <div>
       <PageHeader
