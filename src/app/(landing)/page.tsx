@@ -30,6 +30,7 @@ import {
 import { QuantumParticles } from "./components/QuantumParticles";
 import { GlassCard } from "./components/GlassCard";
 import { Navigation } from "./components/Navigation";
+import Link from "next/link";
 
 function App() {
   const [activeSection, setActiveSection] = useState("hero");
@@ -313,15 +314,17 @@ function App() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 1.5 }}
             >
-              <motion.button
-                className="group relative px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full font-semibold flex items-center space-x-3 text-lg shadow-2xl overflow-hidden hover:bg-white/20 hover:border-white/30 transition-all duration-300"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Rocket className="w-6 h-6" />
-                <span>Start Learning</span>
-                <ArrowRight className="w-6 h-6" />
-              </motion.button>
+              <Link href={"/login"}>
+                <motion.button
+                  className="group relative px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full font-semibold flex items-center space-x-3 text-lg shadow-2xl overflow-hidden hover:bg-white/20 hover:border-white/30 transition-all duration-300"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Rocket className="w-6 h-6" />
+                  <span>Start Learning</span>
+                  <ArrowRight className="w-6 h-6" />
+                </motion.button>
+              </Link>
 
               <motion.button
                 className="group px-8 py-4 bg-black/20 border border-white/10 rounded-full font-semibold flex items-center space-x-3 text-lg backdrop-blur-xl hover:bg-black/30 hover:border-white/20 transition-all duration-300"
