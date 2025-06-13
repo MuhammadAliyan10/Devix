@@ -1,485 +1,474 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Brain,
   Sparkles,
   Rocket,
   Zap,
-  Star,
   ArrowRight,
   Play,
   ChevronDown,
   Check,
   TrendingUp,
   Users,
+  Shield,
+  Globe,
+  Code,
+  Cpu,
+  Eye,
+  Target,
+  Headphones,
+  GraduationCap,
   MessageCircle,
-  Heart,
-  User,
   Github,
   Twitter,
   Linkedin,
   Mail,
-  GraduationCap,
-  BarChart3,
-  BookOpen,
-  Trophy,
-  Calendar,
-  HelpCircle,
 } from "lucide-react";
-import Link from "next/link";
 
-const ModernLandingPage = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+import { QuantumParticles } from "./components/QuantumParticles";
+import { GlassCard } from "./components/GlassCard";
+import { Navigation } from "./components/Navigation";
+
+function App() {
+  const [activeSection, setActiveSection] = useState("hero");
+
+  const { scrollYProgress } = useScroll();
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+
+  const heroRef = useRef<HTMLElement>(null);
+  const servicesRef = useRef<HTMLElement>(null);
+  const featuresRef = useRef<HTMLElement>(null);
+  const pricingRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+    const handleScroll = () => {
+      const sections = [
+        { id: "hero", ref: heroRef },
+        { id: "services", ref: servicesRef },
+        { id: "features", ref: featuresRef },
+        { id: "pricing", ref: pricingRef },
+      ];
+
+      const scrollPosition = window.scrollY + 200;
+
+      for (const section of sections) {
+        const element = section.ref.current;
+        if (element && scrollPosition >= element.offsetTop) {
+          setActiveSection(section.id);
+        }
+      }
     };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const services = [
     {
-      title: "Dashboard",
-      icon: BarChart3,
+      title: "AI-Powered Learning",
+      icon: Brain,
       description:
-        "Comprehensive overview of your learning progress, achievements, and upcoming goals with interactive analytics.",
+        "Personalized learning paths that adapt to your unique style and pace, powered by advanced AI algorithms.",
+      features: ["Custom Study Plans", "Progress Tracking", "Adaptive Content"],
+    },
+    {
+      title: "Interactive Quizzes",
+      icon: Cpu,
+      description:
+        "Engage with dynamic quizzes that provide instant feedback and track your knowledge progression.",
       features: [
-        "Real-time progress tracking",
-        "Personalized insights",
-        "Performance analytics",
-        "Goal visualization",
+        "Instant Feedback",
+        "Dynamic Questions",
+        "Performance Analytics",
       ],
     },
     {
-      title: "Learning Center",
-      icon: BookOpen,
+      title: "Immersive Content",
+      icon: Eye,
       description:
-        "Access curated courses, tutorials, practice labs, and collaborative learning environments.",
-      features: [
-        "Interactive courses",
-        "Hands-on tutorials",
-        "Practice environments",
-        "Study groups",
-        "Content library",
-      ],
+        "Rich, interactive learning materials that make complex concepts engaging and memorable.",
+      features: ["3D Visualizations", "Video Lessons", "Interactive Modules"],
     },
     {
-      title: "Career Development",
-      icon: Trophy,
+      title: "Secure Progress",
+      icon: Shield,
       description:
-        "Accelerate your career with skill assessments, goal tracking, and personalized learning paths.",
-      features: [
-        "Skill assessments",
-        "Career goal setting",
-        "Progress tracking",
-        "Achievement system",
-        "Project management",
-      ],
+        "Your learning data is protected with enterprise-grade security and privacy controls.",
+      features: ["Encrypted Data", "Privacy Controls", "Secure Storage"],
     },
     {
-      title: "Community",
-      icon: Users,
+      title: "Smart Guidance",
+      icon: Target,
       description:
-        "Connect with peers, join discussions, and build your professional network in our vibrant community.",
-      features: [
-        "Professional networking",
-        "Group discussions",
-        "Peer messaging",
-        "Leaderboards",
-        "Blog sharing",
-      ],
+        "AI-powered recommendations and real-time guidance to keep you on track with your goals.",
+      features: ["Goal Setting", "Milestone Alerts", "Personalized Tips"],
     },
     {
-      title: "Smart Calendar",
-      icon: Calendar,
+      title: "Mobile Learning",
+      icon: Zap,
       description:
-        "Intelligent scheduling system that adapts to your learning goals and availability.",
-      features: [
-        "Smart scheduling",
-        "Goal integration",
-        "Reminder system",
-        "Progress milestones",
-      ],
-    },
-    {
-      title: "Support System",
-      icon: HelpCircle,
-      description:
-        "24/7 AI-powered support with comprehensive help resources and community assistance.",
-      features: [
-        "AI chat support",
-        "Knowledge base",
-        "Video tutorials",
-        "Community help",
-      ],
+        "Learn anywhere with our responsive mobile platform, optimized for on-the-go education.",
+      features: ["Offline Access", "Mobile Sync", "Cross-Device"],
     },
   ];
 
   const stats = [
-    { number: "50K+", label: "Active Learners", icon: Users },
+    { number: "1M+", label: "Active Learners", icon: Users },
     { number: "98%", label: "Success Rate", icon: TrendingUp },
-    { number: "500+", label: "Courses", icon: BookOpen },
-    { number: "24/7", label: "AI Support", icon: Brain },
+    { number: "10K+", label: "Learning Paths", icon: Brain },
+    { number: "24/7", label: "AI Support", icon: Headphones },
   ];
 
-  const testimonials = [
+  const features = [
     {
-      name: "Sarah Chen",
-      role: "Software Engineer",
-      quote:
-        "The personalized learning paths and AI-driven insights helped me transition into a senior role within 8 months.",
-      rating: 5,
+      icon: Code,
+      title: "Advanced APIs",
+      description:
+        "Seamless integration with learning tools through our comprehensive API ecosystem.",
     },
     {
-      name: "Marcus Johnson",
-      role: "Product Manager",
-      quote:
-        "The community features and peer learning made all the difference in my professional growth journey.",
-      rating: 5,
+      icon: Zap,
+      title: "Real-Time Feedback",
+      description:
+        "Instant assessment and progress updates powered by machine learning algorithms.",
     },
     {
-      name: "Elena Rodriguez",
-      role: "Data Scientist",
-      quote:
-        "Best investment in my career. The practice labs and real-world projects prepared me for industry challenges.",
-      rating: 5,
+      icon: Shield,
+      title: "Data Security",
+      description:
+        "Enterprise-grade encryption and privacy controls protect your learning journey.",
+    },
+    {
+      icon: Globe,
+      title: "Global Access",
+      description:
+        "Learn from anywhere with our globally distributed, scalable platform.",
     },
   ];
 
   const pricingPlans = [
     {
-      name: "Starter",
+      name: "Free Explorer",
       price: "0",
-      period: "Free Forever",
-      description: "Perfect for getting started with your learning journey",
+      period: "Forever",
+      description: "Perfect for getting started with AI learning",
       features: [
-        "Basic dashboard access",
-        "Limited course library",
-        "Community participation",
-        "Basic progress tracking",
-        "Email support",
+        "Basic study plans",
+        "Community support",
+        "3 weekly quizzes",
+        "Standard security",
       ],
-      popular: false,
       cta: "Start Free",
-    },
-    {
-      name: "Professional",
-      price: "29",
-      period: "per month",
-      description: "Complete access to accelerate your career growth",
-      features: [
-        "Full dashboard & analytics",
-        "Unlimited course access",
-        "Advanced career tools",
-        "Priority community features",
-        "AI-powered recommendations",
-        "Live mentorship sessions",
-        "Priority support",
-      ],
-      popular: true,
-      cta: "Go Professional",
-    },
-    {
-      name: "Enterprise",
-      price: "99",
-      period: "per month",
-      description: "Advanced features for ambitious professionals",
-      features: [
-        "Everything in Professional",
-        "Personal AI career coach",
-        "Custom learning paths",
-        "Advanced project tools",
-        "API access",
-        "Team collaboration",
-        "White-label options",
-        "Dedicated support",
-      ],
       popular: false,
-      cta: "Go Enterprise",
+      icon: Rocket,
+    },
+    {
+      name: "Pro Learner",
+      price: "29",
+      period: "month",
+      description: "Advanced tools for serious learners",
+      features: [
+        "Unlimited study plans",
+        "Advanced quizzes",
+        "Priority support",
+        "AI guidance",
+        "Mobile access",
+        "Analytics",
+      ],
+      cta: "Go Pro",
+      popular: true,
+      icon: Brain,
+    },
+    {
+      name: "Elite Scholar",
+      price: "99",
+      period: "month",
+      description: "Premium experience for academic excellence",
+      features: [
+        "Everything in Pro",
+        "Personal AI tutor",
+        "24/7 support",
+        "Offline access",
+        "Certification",
+        "Group tools",
+      ],
+      cta: "Go Elite",
+      popular: false,
+      icon: Target,
     },
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      <div
-        className="pointer-events-none fixed inset-0 z-50"
-        style={{
-          background: `radial-gradient(300px circle at ${mousePosition.x}px ${mousePosition.y}px,
-            rgba(59, 130, 246, 0.15) 0%,
-            rgba(59, 130, 246, 0.08) 25%,
-            rgba(59, 130, 246, 0.03) 50%,
-            transparent 70%)`,
-        }}
-      />
-      <div
-        className="pointer-events-none fixed z-50 w-4 h-4 rounded-full bg-blue-400/40 blur-sm transition-all duration-75"
-        style={{
-          left: mousePosition.x - 8,
-          top: mousePosition.y - 8,
-          boxShadow:
-            "0 0 20px rgba(59, 130, 246, 0.6), 0 0 40px rgba(59, 130, 246, 0.3)",
-        }}
-      />
-      <div
-        className="pointer-events-none fixed z-50 w-2 h-2 rounded-full bg-blue-300/60 transition-all duration-150"
-        style={{
-          left: mousePosition.x - 4,
-          top: mousePosition.y - 4,
-          boxShadow: "0 0 10px rgba(59, 130, 246, 0.8)",
-        }}
-      />
+    <div className="min-h-screen bg-slate-900 text-white overflow-x-hidden relative">
+      {/* Dark Background */}
+      <div className="fixed inset-0 bg-slate-900">
+        <motion.div className="absolute inset-0" style={{ y: backgroundY }}>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(255,255,255,0.05),transparent_70%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.05),transparent_70%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_40%,rgba(255,255,255,0.03),transparent_70%)]" />
+        </motion.div>
+      </div>
 
-      <div className="relative z-20">
-        {/* Header */}
-        <motion.header
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="fixed top-0 left-0 right-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border"
-        >
-          <div className="container mx-auto px-4 sm:px-6 py-4">
-            <div className="flex items-center justify-between">
-              {/* Logo */}
-              <motion.div
-                className="flex items-center gap-3"
-                whileHover={{ scale: 1.02 }}
-              >
-                <div className="relative">
-                  <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                    <GraduationCap className="w-5 h-5 text-primary-foreground" />
-                  </div>
-                  <div className="absolute -inset-1 bg-primary/20 rounded-xl blur-sm" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-foreground">Devix</h1>
-                  <p className="text-xs text-muted-foreground">
-                    Learn. Grow. Succeed.
-                  </p>
-                </div>
-              </motion.div>
+      {/* Quantum Particles */}
+      <QuantumParticles count={80} />
 
-              {/* Navigation */}
-              <nav className="hidden lg:flex items-center gap-8">
-                {["Features", "Services", "Pricing", "Community"].map(
-                  (item, index) => (
-                    <motion.button
-                      key={item}
-                      className="relative px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      {item}
-                      <motion.div
-                        className="absolute bottom-0 left-0 h-0.5 bg-primary rounded-full"
-                        initial={{ width: 0 }}
-                        whileHover={{ width: "100%" }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    </motion.button>
-                  )
-                )}
-              </nav>
-
-              {/* CTA Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors"
-              >
-                <Link href={"/login"}>Get Started</Link>
-              </motion.button>
-            </div>
-          </div>
-        </motion.header>
+      <div className="relative z-10">
+        <Navigation activeSection={activeSection} />
 
         {/* Hero Section */}
-        <section className="min-h-screen flex items-center justify-center pt-20 px-4 sm:px-6">
-          <div className="container mx-auto text-center">
+        <section
+          id="hero"
+          ref={heroRef}
+          className="min-h-screen flex items-center justify-center pt-20 relative"
+        >
+          <motion.div
+            className="max-w-7xl mx-auto px-6 text-center relative z-10"
+            style={{ y: textY }}
+          >
+            {/* Badge */}
             <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 260,
+                damping: 20,
+                delay: 0.3,
+              }}
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-black/20 border border-white/10 rounded-full mb-8 backdrop-blur-xl hover:bg-black/30 transition-all duration-300 cursor-pointer group"
+            >
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <Sparkles className="w-5 h-5 text-white/80" />
+              </motion.div>
+              <span className="text-sm font-medium text-white/90">
+                Next-Generation Learning Platform
+              </span>
+            </motion.div>
+
+            {/* Main Heading */}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.5 }}
+            >
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
+                <motion.span
+                  className="block"
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 0.7 }}
+                >
+                  Unlock Your
+                </motion.span>
+                <motion.span
+                  className="block text-white/90"
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 0.9 }}
+                >
+                  Learning Potential
+                </motion.span>
+                <motion.span
+                  className="block"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 1.1 }}
+                >
+                  with AI
+                </motion.span>
+              </h1>
+            </motion.div>
+
+            {/* Subtitle */}
+            <motion.p
+              className="text-lg md:text-xl text-slate-300 mb-12 max-w-4xl mx-auto leading-relaxed"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1 }}
-              className="max-w-4xl mx-auto"
+              transition={{ duration: 1, delay: 1.3 }}
             >
-              {/* Badge */}
-              <motion.div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted border border-border mb-8"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.3, type: "spring" }}
-              >
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">
-                  AI-Powered Career Platform
-                </span>
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              </motion.div>
+              Experience personalized learning with AI-driven paths, interactive
+              content, and secure progress tracking.
+              <span className="text-white font-semibold">
+                {" "}
+                Master your goals
+              </span>{" "}
+              with technology that adapts to
+              <span className="text-white font-semibold">
+                {" "}
+                your unique needs
+              </span>
+              .
+            </motion.p>
 
-              {/* Main Heading */}
-              <motion.h1
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.5 }}
+            {/* CTA Buttons */}
+            <motion.div
+              className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-20"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 1.5 }}
+            >
+              <motion.button
+                className="group relative px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full font-semibold flex items-center space-x-3 text-lg shadow-2xl overflow-hidden hover:bg-white/20 hover:border-white/30 transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="block text-foreground">Transform Your</span>
-                <span className="block text-primary">Career Journey</span>
-              </motion.h1>
+                <Rocket className="w-6 h-6" />
+                <span>Start Learning</span>
+                <ArrowRight className="w-6 h-6" />
+              </motion.button>
 
-              {/* Subtitle */}
-              <motion.p
-                className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.7 }}
+              <motion.button
+                className="group px-8 py-4 bg-black/20 border border-white/10 rounded-full font-semibold flex items-center space-x-3 text-lg backdrop-blur-xl hover:bg-black/30 hover:border-white/20 transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Experience the future of professional development with our
-                comprehensive platform that combines AI-driven insights,
-                interactive learning, and vibrant community support.
-              </motion.p>
-
-              {/* CTA Buttons */}
-              <motion.div
-                className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.9 }}
-              >
-                <Link href={"/register"}>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="bg-primary text-primary-foreground px-8 py-4 rounded-xl font-semibold flex items-center gap-2 shadow-lg hover:shadow-primary/25 transition-all"
-                  >
-                    <Rocket className="w-5 h-5" />
-                    Start Your Journey
-                    <ArrowRight className="w-4 h-4" />
-                  </motion.button>
-                </Link>
-
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="border-2 border-border bg-background text-foreground px-8 py-4 rounded-xl font-semibold flex items-center gap-2 hover:bg-muted transition-colors"
-                >
-                  <Play className="w-4 h-4" />
-                  Watch Demo
-                </motion.button>
-              </motion.div>
-
-              {/* Stats */}
-              <motion.div
-                className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 1.1 }}
-              >
-                {stats.map((stat, index) => (
-                  <motion.div
-                    key={index}
-                    className="text-center group"
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    <stat.icon className="w-8 h-8 text-primary mx-auto mb-2" />
-                    <div className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
-                      {stat.number}
-                    </div>
-                    <div className="text-muted-foreground text-sm">
-                      {stat.label}
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
+                <Play className="w-6 h-6" />
+                <span>Watch Demo</span>
+              </motion.button>
             </motion.div>
-          </div>
+
+            {/* Stats */}
+            <motion.div
+              className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.7 }}
+            >
+              {stats.map((stat, index) => (
+                <motion.div
+                  key={index}
+                  className="group text-center cursor-pointer"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.8 + index * 0.1 }}
+                  whileHover={{ scale: 1.05, y: -10 }}
+                >
+                  <motion.div
+                    className="w-20 h-20 mx-auto mb-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl flex items-center justify-center shadow-lg"
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.8 }}
+                  >
+                    <stat.icon className="w-10 h-10 text-white" />
+                  </motion.div>
+                  <div className="text-3xl md:text-4xl font-bold mb-2 text-white">
+                    {stat.number}
+                  </div>
+                  <div className="text-slate-300 group-hover:text-slate-200 transition-colors duration-300 font-medium">
+                    {stat.label}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
 
           {/* Scroll Indicator */}
           <motion.div
-            className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+            className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
             animate={{ y: [0, 10, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <div className="flex flex-col items-center gap-2 text-muted-foreground">
-              <span className="text-sm">Explore Services</span>
-              <ChevronDown className="w-5 h-5" />
+            <div className="flex flex-col items-center space-y-2 text-slate-400 cursor-pointer group">
+              <span className="text-sm group-hover:text-white transition-colors duration-300">
+                Explore Platform
+              </span>
+              <ChevronDown className="w-6 h-6 group-hover:text-white transition-colors duration-300" />
             </div>
           </motion.div>
         </section>
 
         {/* Services Section */}
-        <section className="py-20 px-4 sm:px-6">
-          <div className="container mx-auto">
-            {/* Section Header */}
+        <section
+          id="services"
+          ref={servicesRef}
+          className="py-32 px-6 relative"
+        >
+          <div className="max-w-7xl mx-auto">
             <motion.div
-              className="text-center mb-16"
-              initial={{ opacity: 0, y: 30 }}
+              className="text-center mb-20"
+              initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted border border-border mb-6">
-                <Zap className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">Our Services</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-foreground">
-                Everything You Need to Succeed
+              <h2 className="text-3xl md:text-5xl font-bold mb-6">
+                Learning
+                <span className="block text-white/90">Solutions</span>
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Comprehensive tools and resources designed to accelerate your
-                professional growth
+              <p className="text-lg text-slate-300 max-w-3xl mx-auto">
+                Comprehensive AI-powered tools designed to transform your
+                educational experience
               </p>
             </motion.div>
 
-            {/* Services Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {services.map((service, index) => (
+                <GlassCard
+                  key={index}
+                  icon={service.icon}
+                  title={service.title}
+                  description={service.description}
+                  features={service.features}
+                  delay={index * 0.1}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section
+          id="features"
+          ref={featuresRef}
+          className="py-32 px-6 relative"
+        >
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              className="text-center mb-20"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <h2 className="text-3xl md:text-5xl font-bold mb-6">
+                Platform
+                <span className="block text-white/90">Features</span>
+              </h2>
+              <p className="text-lg text-slate-300 max-w-3xl mx-auto">
+                Advanced capabilities that power your learning journey
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              {features.map((feature, index) => (
                 <motion.div
                   key={index}
-                  className="group relative"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  className="group flex items-start space-x-6 p-8 rounded-2xl hover:bg-black/20 transition-all duration-300 cursor-pointer"
+                  initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  whileHover={{ y: -8 }}
+                  transition={{ duration: 0.8, delay: index * 0.2 }}
+                  whileHover={{ scale: 1.02, x: 10 }}
                 >
-                  <div className="absolute -inset-1 bg-primary/20 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500" />
-
-                  <div className="relative bg-card border border-border rounded-2xl p-6 h-full hover:border-primary/50 transition-all duration-300">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                      <service.icon className="w-6 h-6 text-primary" />
-                    </div>
-
-                    <h3 className="text-xl font-semibold mb-3 text-card-foreground group-hover:text-primary transition-colors">
-                      {service.title}
+                  <motion.div
+                    className="w-16 h-16 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg"
+                    whileHover={{ rotate: 360, scale: 1.2 }}
+                    transition={{ duration: 0.8 }}
+                  >
+                    <feature.icon className="w-8 h-8 text-white" />
+                  </motion.div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-3 group-hover:text-white/90 transition-all duration-300">
+                      {feature.title}
                     </h3>
-
-                    <p className="text-muted-foreground mb-4 leading-relaxed">
-                      {service.description}
+                    <p className="text-slate-300 leading-relaxed group-hover:text-slate-200 transition-colors duration-300">
+                      {feature.description}
                     </p>
-
-                    <div className="space-y-2">
-                      {service.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                          <span className="text-sm text-muted-foreground">
-                            {feature}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <motion.div
-                      className="absolute top-6 right-6 opacity-0 group-hover:opacity-100"
-                      initial={{ x: -10 }}
-                      whileHover={{ x: 0 }}
-                    >
-                      <ArrowRight className="w-5 h-5 text-primary" />
-                    </motion.div>
                   </div>
                 </motion.div>
               ))}
@@ -488,24 +477,21 @@ const ModernLandingPage = () => {
         </section>
 
         {/* Pricing Section */}
-        <section className="py-20 px-4 sm:px-6 bg-muted/30">
-          <div className="container mx-auto">
+        <section id="pricing" ref={pricingRef} className="py-32 px-6 relative">
+          <div className="max-w-7xl mx-auto">
             <motion.div
-              className="text-center mb-16"
-              initial={{ opacity: 0, y: 30 }}
+              className="text-center mb-20"
+              initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background border border-border mb-6">
-                <Star className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">Pricing Plans</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-foreground">
-                Choose Your Path Forward
+              <h2 className="text-3xl md:text-5xl font-bold mb-6">
+                Choose Your
+                <span className="block text-white/90">Learning Plan</span>
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Flexible plans designed to grow with your career ambitions
+              <p className="text-lg text-slate-300 max-w-3xl mx-auto">
+                Flexible pricing options to match your educational goals
               </p>
             </motion.div>
 
@@ -516,70 +502,79 @@ const ModernLandingPage = () => {
                   className={`relative group ${
                     plan.popular ? "md:scale-105" : ""
                   }`}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
-                  whileHover={{ scale: plan.popular ? 1.08 : 1.03 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ scale: plan.popular ? 1.08 : 1.05, y: -10 }}
                 >
+                  {/* Popular Badge */}
                   {plan.popular && (
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                      <div className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
+                    <motion.div
+                      className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-10"
+                      initial={{ opacity: 0, scale: 0 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      <div className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-6 py-2 rounded-full text-sm font-semibold">
                         Most Popular
                       </div>
-                    </div>
+                    </motion.div>
                   )}
 
-                  <div className="absolute -inset-1 bg-primary/20 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500" />
-
                   <div
-                    className={`relative bg-card border-2 rounded-2xl p-8 h-full transition-all duration-300 ${
+                    className={`relative p-8 bg-black/20 border rounded-2xl backdrop-blur-xl transition-all duration-300 h-full ${
                       plan.popular
-                        ? "border-primary"
-                        : "border-border hover:border-primary/50"
+                        ? "border-white/30 bg-black/30"
+                        : "border-white/10 hover:border-white/20"
                     }`}
                   >
+                    {/* Icon */}
+                    <motion.div
+                      className="w-16 h-16 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl flex items-center justify-center mb-6 shadow-lg"
+                      whileHover={{ rotate: 360, scale: 1.1 }}
+                      transition={{ duration: 0.8 }}
+                    >
+                      <plan.icon className="w-8 h-8 text-white" />
+                    </motion.div>
+
+                    {/* Header */}
                     <div className="text-center mb-8">
-                      <h3 className="text-2xl font-bold text-card-foreground mb-2">
-                        {plan.name}
-                      </h3>
-                      <p className="text-muted-foreground text-sm mb-4">
+                      <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
+                      <p className="text-slate-300 text-sm mb-6">
                         {plan.description}
                       </p>
                       <div className="flex justify-center items-baseline mb-2">
-                        <span className="text-4xl font-bold text-card-foreground">
+                        <span className="text-4xl font-bold text-white">
                           ${plan.price}
                         </span>
-                        {plan.period !== "Free Forever" && (
-                          <span className="text-muted-foreground ml-2">
-                            /{plan.period.split(" ")[1]}
+                        {plan.period !== "Forever" && (
+                          <span className="text-slate-300 ml-2">
+                            /{plan.period}
                           </span>
                         )}
                       </div>
-                      <p className="text-muted-foreground text-sm">
-                        {plan.period}
-                      </p>
                     </div>
 
-                    <div className="space-y-3 mb-8">
+                    {/* Features */}
+                    <div className="space-y-4 mb-8">
                       {plan.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center gap-3">
-                          <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                          <span className="text-sm text-muted-foreground">
-                            {feature}
-                          </span>
+                        <div key={idx} className="flex items-center space-x-3">
+                          <Check className="w-5 h-5 text-white/80 flex-shrink-0" />
+                          <span className="text-slate-300">{feature}</span>
                         </div>
                       ))}
                     </div>
 
+                    {/* CTA Button */}
                     <motion.button
+                      className={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 ${
+                        plan.popular
+                          ? "bg-white/20 text-white border border-white/30 hover:bg-white/30"
+                          : "bg-white/10 text-white hover:bg-white/20 border border-white/20"
+                      }`}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`w-full py-3 px-6 rounded-xl font-semibold transition-all ${
-                        plan.popular
-                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                          : "bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground"
-                      }`}
                     >
                       {plan.cta}
                     </motion.button>
@@ -590,248 +585,131 @@ const ModernLandingPage = () => {
           </div>
         </section>
 
-        {/* Testimonials Section */}
-        <section className="py-20 px-4 sm:px-6">
-          <div className="container mx-auto">
-            <motion.div
-              className="text-center mb-16"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted border border-border mb-6">
-                <Heart className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">Success Stories</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-foreground">
-                Trusted by Professionals
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Real stories from professionals who transformed their careers
-                with Devix
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {testimonials.map((testimonial, index) => (
-                <motion.div
-                  key={index}
-                  className="group"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  whileHover={{ y: -5 }}
-                >
-                  <div className="absolute -inset-1 bg-primary/10 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500" />
-
-                  <div className="relative bg-card border border-border rounded-2xl p-6 h-full hover:border-primary/50 transition-all duration-300">
-                    <div className="flex mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className="w-4 h-4 text-yellow-500 fill-current"
-                        />
-                      ))}
-                    </div>
-
-                    <p className="text-muted-foreground mb-6 leading-relaxed italic">
-                      {testimonial.quote}
-                    </p>
-
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <User className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-card-foreground font-semibold">
-                          {testimonial.name}
-                        </p>
-                        <p className="text-muted-foreground text-sm">
-                          {testimonial.role}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* CTA Section */}
-        <section className="py-20 px-4 sm:px-6 bg-muted/30">
-          <div className="container mx-auto">
+        <section className="py-32 px-6 relative">
+          <div className="max-w-4xl mx-auto text-center">
             <motion.div
-              className="text-center max-w-3xl mx-auto"
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
+              className="relative"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background border border-border mb-6">
-                <Rocket className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">Ready to Start?</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-foreground">
-                Begin Your Transformation Today
-              </h2>
-              <p className="text-lg text-muted-foreground mb-8">
-                Join thousands of professionals who are accelerating their
-                careers with our comprehensive platform.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="bg-primary text-primary-foreground px-8 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg hover:shadow-primary/25 transition-all"
-                >
-                  <Rocket className="w-5 h-5" />
-                  Get Started Free
-                  <ArrowRight className="w-4 h-4" />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="border-2 border-border bg-background text-foreground px-8 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-muted transition-colors"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Contact Sales
-                </motion.button>
+              <div className="relative p-16 bg-black/20 border border-white/10 rounded-2xl backdrop-blur-xl overflow-hidden">
+                <h2 className="text-3xl md:text-5xl font-bold mb-8">
+                  Ready to Transform
+                  <span className="block text-white/90">Your Learning?</span>
+                </h2>
+                <p className="text-lg text-slate-300 mb-12 max-w-2xl mx-auto">
+                  Join thousands of learners who are already achieving their
+                  goals with our AI-powered platform.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                  <motion.button
+                    className="group px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full font-semibold flex items-center justify-center space-x-3 text-lg shadow-2xl hover:bg-white/20 hover:border-white/30 transition-all duration-300"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Rocket className="w-6 h-6" />
+                    <span>Start Free Trial</span>
+                    <ArrowRight className="w-6 h-6" />
+                  </motion.button>
+                  <motion.button
+                    className="group px-8 py-4 bg-black/20 border border-white/10 rounded-full font-semibold flex items-center justify-center space-x-3 text-lg backdrop-blur-xl hover:bg-black/30 hover:border-white/20 transition-all duration-300"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <MessageCircle className="w-6 h-6" />
+                    <span>Contact Sales</span>
+                  </motion.button>
+                </div>
               </div>
             </motion.div>
           </div>
         </section>
 
         {/* Footer */}
-        <footer className="py-16 px-4 sm:px-6 bg-card border-t border-border">
-          <div className="container mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <footer className="py-20 px-6 border-t border-white/10 relative">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
               {/* Brand */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="md:col-span-2"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                    <GraduationCap className="w-5 h-5 text-primary-foreground" />
+              <div className="md:col-span-2">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-14 h-14 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl flex items-center justify-center">
+                    <GraduationCap className="w-8 h-8 text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-card-foreground">
-                      Devix
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Professional Development Platform
-                    </p>
-                  </div>
+                  <span className="text-3xl font-bold text-white">Devix</span>
                 </div>
-                <p className="text-muted-foreground max-w-md">
-                  Empowering professionals with AI-driven career development
-                  tools, comprehensive learning resources, and vibrant community
-                  support.
+                <p className="text-slate-300 max-w-md text-lg leading-relaxed mb-8">
+                  Revolutionizing education with AI-powered personalized
+                  learning experiences.
                 </p>
-              </motion.div>
+                <div className="flex space-x-4">
+                  {[Github, Twitter, Linkedin, Mail].map((Icon, index) => (
+                    <motion.button
+                      key={index}
+                      className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-300"
+                      whileHover={{ scale: 1.1, rotate: 360 }}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
 
-              {/* Quick Links */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-              >
-                <h4 className="text-lg font-semibold text-card-foreground mb-4">
+              {/* Links */}
+              <div>
+                <h4 className="text-lg font-semibold mb-6 text-white">
                   Platform
                 </h4>
-                <ul className="space-y-2">
+                <ul className="space-y-4">
                   {[
-                    "Dashboard",
-                    "Learning Center",
-                    "Career Tools",
-                    "Community",
+                    "AI Learning",
+                    "Interactive Quizzes",
+                    "Progress Tracking",
+                    "Mobile App",
                   ].map((item) => (
                     <li key={item}>
-                      <a
-                        href="#"
-                        className="text-muted-foreground hover:text-primary transition-colors"
-                      >
+                      <button className="text-slate-300 hover:text-white transition-colors duration-300">
                         {item}
-                      </a>
+                      </button>
                     </li>
                   ))}
                 </ul>
-              </motion.div>
+              </div>
 
-              {/* Support */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-              >
-                <h4 className="text-lg font-semibold text-card-foreground mb-4">
+              <div>
+                <h4 className="text-lg font-semibold mb-6 text-white">
                   Support
                 </h4>
-                <ul className="space-y-2">
-                  {[
-                    "Help Center",
-                    "Documentation",
-                    "Contact Us",
-                    "Privacy Policy",
-                  ].map((item) => (
-                    <li key={item}>
-                      <a
-                        href="#"
-                        className="text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        {item}
-                      </a>
-                    </li>
-                  ))}
+                <ul className="space-y-4">
+                  {["Help Center", "Documentation", "Community", "Contact"].map(
+                    (item) => (
+                      <li key={item}>
+                        <button className="text-slate-300 hover:text-white transition-colors duration-300">
+                          {item}
+                        </button>
+                      </li>
+                    )
+                  )}
                 </ul>
-              </motion.div>
+              </div>
             </div>
 
-            {/* Bottom Section */}
-            <motion.div
-              className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-border"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-            >
-              <div className="text-muted-foreground text-sm mb-4 md:mb-0">
-                © 2025 Devix. All rights reserved. Built with passion for
-                professional growth.
+            {/* Bottom Bar */}
+            <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-white/10">
+              <div className="text-slate-400 text-sm mb-6 md:mb-0">
+                © 2024 Devix Education. All rights reserved.
               </div>
-
-              <div className="flex items-center gap-4">
-                {[
-                  { icon: Twitter, href: "#", label: "Twitter" },
-                  { icon: Linkedin, href: "#", label: "LinkedIn" },
-                  { icon: Github, href: "#", label: "GitHub" },
-                  { icon: Mail, href: "#", label: "Email" },
-                ].map((social) => (
-                  <motion.a
-                    key={social.label}
-                    href={social.href}
-                    className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300"
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.9 }}
-                    aria-label={social.label}
-                  >
-                    <social.icon className="w-4 h-4" />
-                  </motion.a>
-                ))}
+              <div className="text-slate-400 text-sm">
+                Built with ❤️ for learners worldwide
               </div>
-            </motion.div>
+            </div>
           </div>
         </footer>
       </div>
     </div>
   );
-};
+}
 
-export default ModernLandingPage;
+export default App;

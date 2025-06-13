@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,19 +25,42 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Github, GitPullRequestArrow, Loader2 } from "lucide-react";
+import {
+  Loader2,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  XCircle,
+  Shield,
+  Mail,
+  User,
+} from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { signup } from "../actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
+// Enhanced password validation
+const passwordSchema = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+  .regex(/[0-9]/, "Password must contain at least one number")
+  .regex(
+    /[^A-Za-z0-9]/,
+    "Password must contain at least one special character"
+  );
+
 const formSchema = z
   .object({
-    name: z.string().min(2, { message: "Name must be at least 2 characters" }),
-    email: z.string().email({ message: "Please enter a valid email address" }),
-    password: z
+    name: z
       .string()
-      .min(8, { message: "Password must be at least 8 characters" }),
+      .min(2, "Name must be at least 2 characters")
+      .max(50, "Name must be less than 50 characters")
+      .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces"),
+    email: z.string().email("Please enter a valid email address").toLowerCase(),
+    password: passwordSchema,
     confirmPassword: z.string(),
     agreeToTerms: z.boolean().refine((val) => val === true, {
       message: "You must agree to the terms and conditions",
@@ -49,9 +71,39 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 
+// Password strength indicator
+const getPasswordStrength = (
+  password: string
+): { score: number; text: string; color: string } => {
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[a-z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  const strength = {
+    0: { text: "Very Weak", color: "bg-red-500" },
+    1: { text: "Weak", color: "bg-red-400" },
+    2: { text: "Fair", color: "bg-yellow-500" },
+    3: { text: "Good", color: "bg-blue-500" },
+    4: { text: "Strong", color: "bg-green-500" },
+    5: { text: "Very Strong", color: "bg-green-600" },
+  };
+
+  return { score, ...strength[score as keyof typeof strength] };
+};
+
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    text: "",
+    color: "",
+  });
   const router = useRouter();
 
   useEffect(() => {
@@ -69,34 +121,53 @@ export default function RegisterPage() {
     },
   });
 
+  const watchedPassword = form.watch("password");
+
+  useEffect(() => {
+    if (watchedPassword) {
+      setPasswordStrength(getPasswordStrength(watchedPassword));
+    } else {
+      setPasswordStrength({ score: 0, text: "", color: "" });
+    }
+  }, [watchedPassword]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
     try {
       const res = await signup(values.name, values.email, values.password);
       if (!res.success) {
-        return toast.error(res.message || "Internal server error");
+        return toast.error(
+          res.message || "Registration failed. Please try again."
+        );
       }
-      toast.success("Account created successfully.");
+      toast.success("Account created successfully! Welcome aboard.");
       router.push("/dashboard");
     } catch (error) {
-      console.log(error);
-      toast.error("Internal server error.");
+      console.error("Registration error:", error);
+      toast.error("Something went wrong. Please try again later.");
     } finally {
       setIsLoading(false);
     }
   }
 
   if (!mounted) {
-    return null;
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   const containerVariants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
+      y: 0,
       transition: {
+        duration: 0.6,
         staggerChildren: 0.1,
+        ease: [0.4, 0.0, 0.2, 1],
       },
     },
   };
@@ -107,58 +178,70 @@ export default function RegisterPage() {
       y: 0,
       opacity: 1,
       transition: {
-        type: "spring",
-        stiffness: 100,
+        duration: 0.4,
+        ease: [0.4, 0.0, 0.2, 1],
       },
     },
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+    <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-black p-4">
       <motion.div
         className="w-full max-w-md"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
-        <Card className="border-border/40 bg-background/95 backdrop-blur-sm">
-          <CardHeader className="space-y-1">
+        <Card className="border border-white/10 shadow-2xl shadow-black/50 bg-black/20 backdrop-blur-xl backdrop-saturate-150">
+          <CardHeader className="space-y-2 pb-2">
+            {/* <motion.div
+              variants={itemVariants}
+              className="flex items-center justify-center mb-2"
+            >
+              <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-2">
+                <Shield className="h-6 w-6 text-white" />
+              </div>
+            </motion.div> */}
             <motion.div variants={itemVariants}>
-              <CardTitle className="text-2xl font-bold text-foreground text-center">
-                Create an account
+              <CardTitle className="text-2xl font-semibold text-white text-center tracking-tight">
+                Create your account
               </CardTitle>
             </motion.div>
             <motion.div variants={itemVariants}>
-              <CardDescription className="text-muted-foreground text-center">
-                Enter your information to create an account
+              <CardDescription className="text-slate-300 text-center text-sm">
+                Join thousands of professionals already using our platform
               </CardDescription>
             </motion.div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <motion.div
-              className="flex flex-col space-y-2 text-center"
-              variants={itemVariants}
-            >
-              <div className="grid grid-cols-2 gap-2">
+
+          <CardContent className="space-y-6 px-6">
+            {/* Social Login Options */}
+            <motion.div variants={itemVariants}>
+              {/* <div className="grid grid-cols-2 gap-3">
                 <Button
                   variant="outline"
-                  className="flex items-center justify-center gap-2"
+                  className="h-11 border-white/20 bg-white/5 hover:bg-white/10 text-white backdrop-blur-sm transition-colors"
+                  disabled={isLoading}
                 >
-                  <GitPullRequestArrow className="h-4 w-4" />
-                  <span>Google</span>
+                  <Chrome className="h-4 w-4 mr-2" />
+                  Google
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex items-center justify-center gap-2"
+                  className="h-11 border-white/20 bg-white/5 hover:bg-white/10 text-white backdrop-blur-sm transition-colors"
+                  disabled={isLoading}
                 >
-                  <Github className="h-4 w-4" />
-                  <span>GitHub</span>
+                  <Github className="h-4 w-4 mr-2" />
+                  GitHub
                 </Button>
-              </div>
+              </div> */}
+
               <div className="relative flex items-center justify-center">
-                <span className="absolute inset-x-0 h-px bg-border" />
-                <span className="relative bg-background px-2 my-3 text-xs text-muted-foreground">
-                  OR CONTINUE WITH
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-white/20" />
+                </div>
+                <span className="relative bg-black/40 backdrop-blur-sm px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                  Or continue with email
                 </span>
               </div>
             </motion.div>
@@ -174,15 +257,21 @@ export default function RegisterPage() {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Full Name</FormLabel>
+                        <FormLabel className="text-sm font-medium text-slate-200">
+                          Full Name
+                        </FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="John Doe"
-                            {...field}
-                            className="bg-background"
-                          />
+                          <div className="relative">
+                            <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                            <Input
+                              placeholder="Enter your full name"
+                              {...field}
+                              className="h-11 pl-10 border-white/20 bg-white/5 backdrop-blur-sm text-white placeholder:text-slate-400 focus:border-white/40 focus:bg-white/10 transition-colors"
+                              disabled={isLoading}
+                            />
+                          </div>
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-xs" />
                       </FormItem>
                     )}
                   />
@@ -194,15 +283,22 @@ export default function RegisterPage() {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                          Email Address
+                        </FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="your.email@example.com"
-                            {...field}
-                            className="bg-background"
-                          />
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                            <Input
+                              type="email"
+                              placeholder="Enter your email address"
+                              {...field}
+                              className="h-11 pl-10 border-white/20 bg-white/5 backdrop-blur-sm text-white placeholder:text-slate-400 focus:border-white/40 focus:bg-white/10 transition-colors"
+                              disabled={isLoading}
+                            />
+                          </div>
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-xs" />
                       </FormItem>
                     )}
                   />
@@ -214,16 +310,65 @@ export default function RegisterPage() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <FormLabel className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                          Password
+                        </FormLabel>
                         <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="••••••••"
-                            {...field}
-                            className="bg-background"
-                          />
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Create a strong password"
+                              {...field}
+                              className="h-11 pr-10 border-white/20 bg-white/5 backdrop-blur-sm text-white placeholder:text-slate-400 focus:border-white/40 focus:bg-white/10 transition-colors"
+                              disabled={isLoading}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                              disabled={isLoading}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4 text-slate-400" />
+                              ) : (
+                                <Eye className="h-4 w-4 text-slate-400" />
+                              )}
+                            </Button>
+                          </div>
                         </FormControl>
-                        <FormMessage />
+                        {watchedPassword && (
+                          <div className="mt-2">
+                            <div className="flex items-center justify-between text-xs mb-1">
+                              <span className="text-slate-300">
+                                Password strength
+                              </span>
+                              <span
+                                className={`font-medium ${
+                                  passwordStrength.score >= 4
+                                    ? "text-green-400"
+                                    : passwordStrength.score >= 3
+                                    ? "text-blue-400"
+                                    : "text-red-400"
+                                }`}
+                              >
+                                {passwordStrength.text}
+                              </span>
+                            </div>
+                            <div className="w-full bg-white/10 rounded-full h-1.5">
+                              <div
+                                className={`${passwordStrength.color} h-1.5 rounded-full transition-all duration-300 ease-out`}
+                                style={{
+                                  width: `${
+                                    (passwordStrength.score / 5) * 100
+                                  }%`,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                        <FormMessage className="text-xs" />
                       </FormItem>
                     )}
                   />
@@ -235,16 +380,46 @@ export default function RegisterPage() {
                     name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
+                        <FormLabel className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                          Confirm Password
+                        </FormLabel>
                         <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="••••••••"
-                            {...field}
-                            className="bg-background"
-                          />
+                          <div className="relative">
+                            <Input
+                              type={showConfirmPassword ? "text" : "password"}
+                              placeholder="Confirm your password"
+                              {...field}
+                              className="h-11 pr-10 border-white/20 bg-white/5 backdrop-blur-sm text-white placeholder:text-slate-400 focus:border-white/40 focus:bg-white/10 transition-colors"
+                              disabled={isLoading}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                              onClick={() =>
+                                setShowConfirmPassword(!showConfirmPassword)
+                              }
+                              disabled={isLoading}
+                            >
+                              {showConfirmPassword ? (
+                                <EyeOff className="h-4 w-4 text-slate-400" />
+                              ) : (
+                                <Eye className="h-4 w-4 text-slate-400" />
+                              )}
+                              {field.value && watchedPassword && (
+                                <div className="absolute -right-8 top-1/2 -translate-y-1/2">
+                                  {field.value === watchedPassword ? (
+                                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                  ) : (
+                                    <XCircle className="h-4 w-4 text-red-500" />
+                                  )}
+                                </div>
+                              )}
+                            </Button>
+                          </div>
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-xs" />
                       </FormItem>
                     )}
                   />
@@ -255,24 +430,33 @@ export default function RegisterPage() {
                     control={form.control}
                     name="agreeToTerms"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-2 space-y-0">
+                      <FormItem className="flex flex-row items-start space-x-1 space-y-0 py-2">
                         <FormControl>
                           <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
+                            className="mt-0.5 data-[state=checked]:bg-white data-[state=checked]:border-white border-white/30"
+                            disabled={isLoading}
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel className="text-sm font-medium text-muted-foreground">
+                          <FormLabel className="text-sm text-slate-300 font-normal">
                             I agree to the{" "}
                             <Link
                               href="/terms"
-                              className="text-primary underline hover:text-primary/90"
+                              className="font-medium text-white hover:underline underline-offset-4"
                             >
-                              terms and conditions
+                              Terms of Service
+                            </Link>{" "}
+                            and{" "}
+                            <Link
+                              href="/privacy"
+                              className="font-medium text-white hover:underline underline-offset-4"
+                            >
+                              Privacy Policy
                             </Link>
                           </FormLabel>
-                          <FormMessage />
+                          <FormMessage className="text-xs" />
                         </div>
                       </FormItem>
                     )}
@@ -280,31 +464,49 @@ export default function RegisterPage() {
                 </motion.div>
 
                 <motion.div variants={itemVariants}>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    className="w-full h-11 bg-white/10 hover:bg-white/20 text-white font-medium backdrop-blur-sm border border-white/20 hover:border-white/30 transition-colors"
+                    disabled={isLoading}
+                  >
                     {isLoading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : null}
-                    Create Account
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating Account...
+                      </>
+                    ) : (
+                      "Create Account"
+                    )}
                   </Button>
                 </motion.div>
               </form>
             </Form>
           </CardContent>
-          <CardFooter>
+
+          <CardFooter className="pt-2">
             <motion.p
-              className="text-center text-sm text-muted-foreground w-full"
+              className="text-center text-sm text-slate-300 w-full"
               variants={itemVariants}
             >
               Already have an account?{" "}
               <Link
                 href="/login"
-                className="text-primary font-medium hover:underline"
+                className="font-medium text-white hover:underline underline-offset-4 transition-colors"
               >
                 Sign in
               </Link>
             </motion.p>
           </CardFooter>
         </Card>
+
+        {/* Security Notice */}
+        <motion.div
+          variants={itemVariants}
+          className="mt-4 text-center text-xs text-slate-400"
+        >
+          <Shield className="h-3 w-3 inline mr-1" />
+          Your data is encrypted and secure
+        </motion.div>
       </motion.div>
     </div>
   );
